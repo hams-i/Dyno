@@ -88,7 +88,7 @@ Quit from the Dyno menu bar icon when you’re done.
 
 Mac çentiğinde yaşayan Dynamic Island tarzı bir yardımcı: Şimdi Çalıyor, pano geçmişi, zamanlayıcı ve sayaç. Ada ile geniş panel arasında yumuşak morph animasyonları vardır.
 
-**Açık kaynak:** [github.com/hams-i/Dyno](https://github.com/hams-i/Dyno)
+**Açık kaynak:** [github.com/hams-i/Dyno](https://github.com/hams-i/Dyno) · **Lisans:** [MIT](./LICENSE)
 
 ![Adada Şimdi Çalıyor](./source/readme-island-media.png)
 
