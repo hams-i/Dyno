@@ -1,0 +1,430 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B00000000000000000000001 /* DynoIslandApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000001 /* DynoIslandApp.swift */; };
+		B00000000000000000000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000002 /* AppDelegate.swift */; };
+		B00000000000000000000003 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* AppModel.swift */; };
+		B00000000000000000000004 /* ClipboardEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000004 /* ClipboardEntry.swift */; };
+		B00000000000000000000005 /* NowPlayingSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000005 /* NowPlayingSnapshot.swift */; };
+		B00000000000000000000006 /* ClipboardHistoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000006 /* ClipboardHistoryService.swift */; };
+		B00000000000000000000007 /* NowPlayingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000007 /* NowPlayingService.swift */; };
+		B00000000000000000000009 /* IslandPanelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000009 /* IslandPanelController.swift */; };
+		B00000000000000000000091 /* NotchSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000091 /* NotchSpace.swift */; };
+		B0000000000000000000000A /* IslandRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000A /* IslandRootView.swift */; };
+		B0000000000000000000000B /* CompactIslandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000B /* CompactIslandView.swift */; };
+		B0000000000000000000000C /* ExpandedIslandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000C /* ExpandedIslandView.swift */; };
+		B0000000000000000000000D /* MediaTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000D /* MediaTabView.swift */; };
+		B0000000000000000000000E /* ClipboardTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000E /* ClipboardTabView.swift */; };
+		B0000000000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000F /* Assets.xcassets */; };
+		B0000000000000000000001B /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000001B /* AppIcon.icns */; };
+		B00000000000000000000012 /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000012 /* StatusItemController.swift */; };
+		B0000000000000000000001C /* HotKeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000001C /* HotKeyController.swift */; };
+		B00000000000000000000013 /* TimerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000013 /* TimerService.swift */; };
+		B00000000000000000000014 /* CounterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000014 /* CounterService.swift */; };
+		B00000000000000000000015 /* TimerTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000015 /* TimerTabView.swift */; };
+		B00000000000000000000016 /* CounterTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000016 /* CounterTabView.swift */; };
+		B00000000000000000000017 /* ActivitiesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000017 /* ActivitiesStore.swift */; };
+		B00000000000000000000018 /* ArtworkImageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000018 /* ArtworkImageFactory.swift */; };
+		B00000000000000000000019 /* PreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000019 /* PreferencesStore.swift */; };
+		B0000000000000000000001A /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000001A /* SettingsRootView.swift */; };
+		B0000000000000000000001D /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000001D /* L10n.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F00000000000000000000001 /* DynoIslandApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynoIslandApp.swift; sourceTree = "<group>"; };
+		F00000000000000000000002 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F00000000000000000000003 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		F00000000000000000000004 /* ClipboardEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardEntry.swift; sourceTree = "<group>"; };
+		F00000000000000000000005 /* NowPlayingSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingSnapshot.swift; sourceTree = "<group>"; };
+		F00000000000000000000006 /* ClipboardHistoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryService.swift; sourceTree = "<group>"; };
+		F00000000000000000000007 /* NowPlayingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingService.swift; sourceTree = "<group>"; };
+		F00000000000000000000009 /* IslandPanelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandPanelController.swift; sourceTree = "<group>"; };
+		F00000000000000000000091 /* NotchSpace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchSpace.swift; sourceTree = "<group>"; };
+		F0000000000000000000000A /* IslandRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandRootView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000B /* CompactIslandView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactIslandView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000C /* ExpandedIslandView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedIslandView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000D /* MediaTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaTabView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000E /* ClipboardTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardTabView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F0000000000000000000001B /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
+		F00000000000000000000010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F00000000000000000000011 /* DynoIsland.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DynoIsland.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F00000000000000000000012 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
+		F00000000000000000000013 /* TimerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerService.swift; sourceTree = "<group>"; };
+		F00000000000000000000014 /* CounterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterService.swift; sourceTree = "<group>"; };
+		F00000000000000000000015 /* TimerTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerTabView.swift; sourceTree = "<group>"; };
+		F00000000000000000000016 /* CounterTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterTabView.swift; sourceTree = "<group>"; };
+		F00000000000000000000017 /* ActivitiesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitiesStore.swift; sourceTree = "<group>"; };
+		F00000000000000000000018 /* ArtworkImageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkImageFactory.swift; sourceTree = "<group>"; };
+		F00000000000000000000019 /* PreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesStore.swift; sourceTree = "<group>"; };
+		F0000000000000000000001A /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
+		F0000000000000000000001C /* HotKeyController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyController.swift; sourceTree = "<group>"; };
+		F0000000000000000000001D /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		P00000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		G00000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				G00000000000000000000003 /* DynoIsland */,
+				G00000000000000000000002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		G00000000000000000000002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000011 /* DynoIsland.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000003 /* DynoIsland */ = {
+			isa = PBXGroup;
+			children = (
+				G00000000000000000000004 /* App */,
+				G00000000000000000000005 /* Models */,
+				G00000000000000000000006 /* Services */,
+				G00000000000000000000007 /* Views */,
+				G0000000000000000000000A /* Settings */,
+				G00000000000000000000008 /* Window */,
+				G00000000000000000000009 /* Resources */,
+				F00000000000000000000010 /* Info.plist */,
+			);
+			path = DynoIsland;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000004 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000001 /* DynoIslandApp.swift */,
+				F00000000000000000000002 /* AppDelegate.swift */,
+				F00000000000000000000003 /* AppModel.swift */,
+				F00000000000000000000012 /* StatusItemController.swift */,
+				F0000000000000000000001C /* HotKeyController.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000005 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000004 /* ClipboardEntry.swift */,
+				F00000000000000000000005 /* NowPlayingSnapshot.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000006 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000006 /* ClipboardHistoryService.swift */,
+				F00000000000000000000007 /* NowPlayingService.swift */,
+				F00000000000000000000013 /* TimerService.swift */,
+				F00000000000000000000014 /* CounterService.swift */,
+				F00000000000000000000017 /* ActivitiesStore.swift */,
+				F00000000000000000000018 /* ArtworkImageFactory.swift */,
+				F00000000000000000000019 /* PreferencesStore.swift */,
+				F0000000000000000000001D /* L10n.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000007 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F0000000000000000000000A /* IslandRootView.swift */,
+				F0000000000000000000000B /* CompactIslandView.swift */,
+				F0000000000000000000000C /* ExpandedIslandView.swift */,
+				F0000000000000000000000D /* MediaTabView.swift */,
+				F0000000000000000000000E /* ClipboardTabView.swift */,
+				F00000000000000000000015 /* TimerTabView.swift */,
+				F00000000000000000000016 /* CounterTabView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		G0000000000000000000000A /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F0000000000000000000001A /* SettingsRootView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000008 /* Window */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000009 /* IslandPanelController.swift */,
+				F00000000000000000000091 /* NotchSpace.swift */,
+			);
+			path = Window;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000009 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F0000000000000000000000F /* Assets.xcassets */,
+				F0000000000000000000001B /* AppIcon.icns */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		T00000000000000000000001 /* DynoIsland */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = L00000000000000000000002 /* Build configuration list for PBXNativeTarget "DynoIsland" */;
+			buildPhases = (
+				P00000000000000000000001 /* Sources */,
+				P00000000000000000000003 /* Frameworks */,
+				P00000000000000000000002 /* Resources */,
+				P00000000000000000000004 /* Copy MediaRemote Adapter */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DynoIsland;
+			productName = DynoIsland;
+			productReference = F00000000000000000000011 /* DynoIsland.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		PR0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					T00000000000000000000001 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = L00000000000000000000001 /* Build configuration list for PBXProject "DynoIsland" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = tr;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				tr,
+			);
+			mainGroup = G00000000000000000000001;
+			productRefGroup = G00000000000000000000002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				T00000000000000000000001 /* DynoIsland */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		P00000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0000000000000000000000F /* Assets.xcassets in Resources */,
+				B0000000000000000000001B /* AppIcon.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		P00000000000000000000004 /* Copy MediaRemote Adapter */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Vendor/MediaRemoteAdapter/mediaremote-adapter.pl",
+				"$(SRCROOT)/Vendor/MediaRemoteAdapter/MediaRemoteAdapter.framework/MediaRemoteAdapter",
+			);
+			name = "Copy MediaRemote Adapter";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/MediaRemoteAdapter/mediaremote-adapter.pl",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/zsh;
+			shellScript = "\"${SRCROOT}/Scripts/copy-mediaremote-resources.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		P00000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000001 /* DynoIslandApp.swift in Sources */,
+				B00000000000000000000002 /* AppDelegate.swift in Sources */,
+				B00000000000000000000003 /* AppModel.swift in Sources */,
+				B00000000000000000000004 /* ClipboardEntry.swift in Sources */,
+				B00000000000000000000005 /* NowPlayingSnapshot.swift in Sources */,
+				B00000000000000000000006 /* ClipboardHistoryService.swift in Sources */,
+				B00000000000000000000007 /* NowPlayingService.swift in Sources */,
+				B00000000000000000000009 /* IslandPanelController.swift in Sources */,
+				B00000000000000000000091 /* NotchSpace.swift in Sources */,
+				B0000000000000000000000A /* IslandRootView.swift in Sources */,
+				B0000000000000000000000B /* CompactIslandView.swift in Sources */,
+				B0000000000000000000000C /* ExpandedIslandView.swift in Sources */,
+				B0000000000000000000000D /* MediaTabView.swift in Sources */,
+				B0000000000000000000000E /* ClipboardTabView.swift in Sources */,
+				B00000000000000000000012 /* StatusItemController.swift in Sources */,
+				B0000000000000000000001C /* HotKeyController.swift in Sources */,
+				B00000000000000000000013 /* TimerService.swift in Sources */,
+				B00000000000000000000014 /* CounterService.swift in Sources */,
+				B00000000000000000000015 /* TimerTabView.swift in Sources */,
+				B00000000000000000000016 /* CounterTabView.swift in Sources */,
+				B00000000000000000000017 /* ActivitiesStore.swift in Sources */,
+				B00000000000000000000018 /* ArtworkImageFactory.swift in Sources */,
+				B00000000000000000000019 /* PreferencesStore.swift in Sources */,
+				B0000000000000000000001D /* L10n.swift in Sources */,
+				B0000000000000000000001A /* SettingsRootView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C00000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C00000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		C00000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = C3BDPKK398;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DynoIsland/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dynoisland.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C00000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = C3BDPKK398;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DynoIsland/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dynoisland.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		L00000000000000000000001 /* Build configuration list for PBXProject "DynoIsland" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C00000000000000000000001 /* Debug */,
+				C00000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		L00000000000000000000002 /* Build configuration list for PBXNativeTarget "DynoIsland" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C00000000000000000000003 /* Debug */,
+				C00000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = PR0000000000000000000001 /* Project object */;
+}
