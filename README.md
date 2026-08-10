@@ -2,7 +2,7 @@
 
 A macOS Dynamic Island–style companion that lives in the notch: Now Playing, clipboard history, a timer, and a counter — with smooth morph animations between the compact island and the expanded panel.
 
-**Open source:** [github.com/hams-i/Dyno](https://github.com/hams-i/Dyno)
+**Open source:** [github.com/hams-i/Dyno](https://github.com/hams-i/Dyno) · **License:** [MIT](./LICENSE)
 
 ![Now Playing island](./source/readme-island-media.png)
 
