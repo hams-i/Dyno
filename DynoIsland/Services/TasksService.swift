@@ -97,16 +97,47 @@ final class TasksService: ObservableObject {
         persist()
     }
 
-    /// Ada üzerindeki tik: seçili görevi tamamlar.
+    private var lastCompleteUptime: TimeInterval = 0
+
+    /// Ada üzerindeki tik: seçili görevi tamamlar, alttaki (tamamlanmamış) maddeyi seçer.
     @discardableResult
     func completeSelected() -> Bool {
-        guard let task = selectedTask, !task.isCompleted else { return false }
-        toggle(task.id)
-        // Sonraki tamamlanmamış göreve geç.
-        if let next = tasks.first(where: { !$0.isCompleted }) {
-            selectedTaskID = next.id
-            persistSelection()
+        // AppKit + SwiftUI aynı tıklamada iki kez tetiklenmesin.
+        let now = ProcessInfo.processInfo.systemUptime
+        guard now - lastCompleteUptime > 0.28 else { return false }
+
+        // Seçili tamamlanmışsa / yoksa ilk tamamlanmamışa geç.
+        let targetID: UUID
+        if let id = selectedTaskID,
+           let task = tasks.first(where: { $0.id == id }),
+           !task.isCompleted {
+            targetID = id
+        } else if let id = tasks.first(where: { !$0.isCompleted })?.id {
+            targetID = id
+        } else {
+            return false
         }
+
+        guard let index = tasks.firstIndex(where: { $0.id == targetID }) else { return false }
+
+        lastCompleteUptime = now
+        tasks[index].isCompleted = true
+        tasks[index].completedAt = Date()
+
+        // Bir altındaki ilk tamamlanmamış; yoksa listedeki başka aktif.
+        let below = tasks.indices.contains(index + 1)
+            ? tasks[(index + 1)...].first(where: { !$0.isCompleted })
+            : nil
+        if let below {
+            selectedTaskID = below.id
+        } else if let other = tasks.first(where: { !$0.isCompleted }) {
+            selectedTaskID = other.id
+        } else {
+            selectedTaskID = targetID
+        }
+
+        persist()
+        persistSelection()
         return true
     }
 

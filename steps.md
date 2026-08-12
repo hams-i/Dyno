@@ -1,5 +1,24 @@
 # Steps
 
+## 2026-08-12 — Commit + landing yayın (Tasks polish)
+
+1. Ada onay butonu, tik zinciri, input accent selection.
+2. Landing demo/copy senkron; push → GitHub Pages.
+
+## 2026-08-12 — Görevler input selection: accent + siyah
+
+1. Input’ta seçili metin: accent arka plan, siyah yazı.
+
+## 2026-08-12 — Görevler ada tik: ikinci tıklama
+
+1. AppKit/SwiftUI çift tetik + tamamlanmış seçimde takılma düzeltildi.
+2. Tik sonrası alttaki tamamlanmamış madde seçilir; hit yalnızca AppKit.
+
+## 2026-08-12 — Görevler ada: onay butonu
+
+1. Görevler adasında sağda ses dalgası yok — onay (tik) butonu.
+2. Tik: seçili görevi tamamlar, listedeki bir alttakini seçer.
+
 ## 2026-08-12 — Landing Tasks + yayın
 
 1. Landing demo/i18n’e Görevler sekmesi eklendi (seçim, filtre, ada etiketi).

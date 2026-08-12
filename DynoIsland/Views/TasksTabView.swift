@@ -44,7 +44,7 @@ struct TasksTabView: View {
                 .textFieldStyle(.plain)
                 .font(.system(size: 12.5, weight: .medium))
                 .foregroundStyle(isDraftFocused ? Color.black : Color.white.opacity(0.92))
-                .tint(isDraftFocused ? Color.black : Color.accentColor)
+                .tint(Color.accentColor)
                 .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity)
                 .frame(height: 30)
@@ -72,6 +72,18 @@ struct TasksTabView: View {
                     DispatchQueue.main.async {
                         applyFocusedFieldSelectionChrome()
                     }
+                }
+                .onChange(of: draft) { _, _ in
+                    guard isDraftFocused else { return }
+                    applyFocusedFieldSelectionChrome()
+                }
+                .onReceive(
+                    NotificationCenter.default.publisher(
+                        for: NSTextView.didChangeSelectionNotification
+                    )
+                ) { _ in
+                    guard isDraftFocused else { return }
+                    applyFocusedFieldSelectionChrome()
                 }
                 .animation(.snappy(duration: 0.18), value: isDraftFocused)
 
@@ -202,10 +214,14 @@ struct TasksTabView: View {
     }
 
     private func applyFocusedFieldSelectionChrome() {
-        guard let window = NSApp.keyWindow,
-              let editor = window.firstResponder as? NSTextView else { return }
+        guard let window = NSApp.keyWindow else { return }
+        let editor = (window.firstResponder as? NSTextView)
+            ?? window.fieldEditor(false, for: nil) as? NSTextView
+        guard let editor else { return }
+
+        let accent = NSColor(named: "AccentColor") ?? .controlAccentColor
         editor.selectedTextAttributes = [
-            .backgroundColor: NSColor.white,
+            .backgroundColor: accent,
             .foregroundColor: NSColor.black
         ]
         editor.insertionPointColor = .black

@@ -429,16 +429,30 @@ export function DynamicIslandDemo({
   };
 
   const completeSelectedTask = () => {
-    if (!selectedTask || selectedTask.completed) return;
+    const list = tasks;
+    let targetId = selectedTaskId;
+    let target = list.find((item) => item.id === targetId);
+    if (!target || target.completed) {
+      target = list.find((item) => !item.completed);
+      targetId = target?.id ?? "";
+      if (!targetId) return;
+      setSelectedTaskId(targetId);
+    }
+    const index = list.findIndex((item) => item.id === targetId);
+    if (index < 0) return;
+
     setTasks((prev) =>
       prev.map((item) =>
-        item.id === selectedTaskId ? { ...item, completed: true } : item,
+        item.id === targetId ? { ...item, completed: true } : item,
       ),
     );
-    const next = tasks.find(
-      (item) => item.id !== selectedTaskId && !item.completed,
+
+    const below = list.slice(index + 1).find((item) => !item.completed);
+    const other = list.find(
+      (item) => item.id !== targetId && !item.completed,
     );
-    if (next) setSelectedTaskId(next.id);
+    if (below) setSelectedTaskId(below.id);
+    else if (other) setSelectedTaskId(other.id);
   };
 
   const deleteTask = (id: string) => {
@@ -463,7 +477,7 @@ export function DynamicIslandDemo({
           ? 280
           : 270;
   const showVoiceBars =
-    !isDocked && (tab === "media" || tab === "clipboard" || tab === "tasks");
+    !isDocked && (tab === "media" || tab === "clipboard");
   const canDock = dockableTabs.includes(tab);
   const targetW = expanded ? EXPANDED_W : compactWidth;
   const targetH = expanded ? EXPANDED_H : COMPACT_H;
@@ -596,7 +610,7 @@ export function DynamicIslandDemo({
                   </button>
                 )}
 
-                {tab === "tasks" && isDocked && (
+                {tab === "tasks" && (
                   <button
                     type="button"
                     onClick={(e) => {
@@ -1148,6 +1162,7 @@ function TasksPage({
             "h-[30px] min-w-0 flex-1 rounded-full border px-3 text-[12.5px] font-medium outline-none",
             "border-white/[0.08] bg-white/[0.06] text-white/92 placeholder:text-white/32",
             "focus:border-transparent focus:bg-white focus:text-black focus:placeholder:text-black/35",
+            "selection:bg-dyno-accent selection:text-black",
           )}
         />
         <button

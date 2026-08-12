@@ -451,7 +451,9 @@ final class IslandPanelController {
 
         let fromTrailing = hitPanel.frame.maxX - screenPoint.x
         // Docked yerleşim (sağdan): chevron inset 6 / Ø20 → ~6…26;
-        // play/+ inset 31 / Ø22 → ~31…53. Bölgeler çakışmasın.
+        // play/+/tik inset 31 / Ø22 → ~31…53. Bölgeler çakışmasın.
+        // Görevler tik’i dock değilken de sağda — biraz daha geniş hit.
+        let primaryZone: CGFloat = model.selectedTab == .tasks ? 52 : 36
         if model.isActivityDocked {
             if fromTrailing <= 28 {
                 model.expandFromDock()
@@ -462,7 +464,7 @@ final class IslandPanelController {
                 performPrimaryCompactAction()
                 return true
             }
-        } else if fromTrailing <= 36 {
+        } else if fromTrailing <= primaryZone {
             performPrimaryCompactAction()
             return true
         }
@@ -482,6 +484,10 @@ final class IslandPanelController {
             withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
                 model.counter.increment()
             }
+        case .tasks:
+            // Animasyon completeSelected içinde yayınlanır; burada sarmalama
+            // çift tetik / stale state riskini artırıyordu.
+            _ = model.tasks.completeSelected()
         default:
             break
         }

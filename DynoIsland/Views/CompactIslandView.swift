@@ -118,13 +118,13 @@ struct IslandAccentLayer: View {
 
     private var showsVoiceCharts: Bool {
         switch model.selectedTab {
-        case .media, .clipboard, .tasks: true
-        case .timer, .counter: false
+        case .media, .clipboard: true
+        case .tasks, .timer, .counter: false
         }
     }
 
     private var chartsAnimating: Bool {
-        if model.selectedTab == .clipboard || model.selectedTab == .tasks {
+        if model.selectedTab == .clipboard {
             return true
         }
         return media.snapshot.isPlaying && media.snapshot.hasMedia
@@ -166,8 +166,11 @@ struct IslandMorphLayer: View {
     }
 
     /// Ada kilitliyken sağdaki aşağı ok kadar ekstra boşluk.
+    /// Görevler’de onay butonu her zaman sağda — dock olmasa da yer ayır.
     private var trailingInset: CGFloat {
-        model.isActivityDocked ? 31 : 6
+        if model.isActivityDocked { return 31 }
+        if model.selectedTab == .tasks { return 6 }
+        return 6
     }
 
     /// Açılış animasyonu: öğeler çentik merkezinden yanlara açılır.
@@ -324,9 +327,9 @@ struct IslandMorphLayer: View {
                     )
             }
             .buttonStyle(.plain)
-            .disabled(!tasks.canCompleteSelected)
-            // Tik yalnızca yukarı ok ile dock’luyken; aksi halde sağda ses dalgası.
-            .opacity(model.isActivityDocked ? islandOnlyOpacity(metrics.progress) : 0)
+            // Tıklama AppKit compact-hit ile gelir; SwiftUI çift tetiklemesin.
+            .allowsHitTesting(false)
+            .opacity(islandOnlyOpacity(metrics.progress))
             .help(L10n.tasksCompleteNext)
         }
     }

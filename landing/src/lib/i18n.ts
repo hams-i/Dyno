@@ -140,11 +140,11 @@ const en: Messages = {
       },
       tasks: {
         title: "Tasks",
-        desc: "Add to-dos in the notch, check them off, and pin the active one to the island.",
+        desc: "Add to-dos in the notch, check them off, and keep the active one on the island.",
         points: [
           "Add tasks, filter All / Active / Completed",
           "Tap a task to show its first letters on the island",
-          "Dock with the up arrow — complete the selected task at a glance",
+          "Complete from the island check button — the next task is selected automatically",
         ],
       },
       timer: {
@@ -294,11 +294,11 @@ const tr: Messages = {
       },
       tasks: {
         title: "Görevler",
-        desc: "Çentikte yapılacak ekle, tikle ve aktif görevi adaya sabitle.",
+        desc: "Çentikte yapılacak ekle, tikle ve aktif görevi adada tut.",
         points: [
           "Görev ekle, Tümü / Aktif / Tamamlanan filtrele",
           "Bir göreve dokun — adada ilk harfleri görünsün",
-          "Yukarı ok ile sabitle — seçili görevi adadan tamamla",
+          "Adadaki onay butonuyla tamamla — sıradaki otomatik seçilir",
         ],
       },
       timer: {

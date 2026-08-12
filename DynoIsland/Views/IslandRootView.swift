@@ -159,17 +159,15 @@ struct MorphElement<Content: View>: View {
             .allowsHitTesting(isHitEnabled)
     }
 
-    /// Ada: play/+ her zaman; tasks tik yalnızca dock’luyken.
+    /// Ada: play/+ tıklanabilir. Tasks tik AppKit compact-hit ile gelir
+    /// (SwiftUI çift tetiklemeyi önlemek için hit kapalı).
     /// Geniş panel: yalnızca kendi sayfasındayken etkileşimli ankorda.
     private var isHitEnabled: Bool {
         guard visibility > 0.85 else { return false }
         let pageDistance = abs(model.pageScroll - model.restScroll(for: tab))
         guard pageDistance < max(model.pageWidth, 1) * 0.45 else { return false }
         if progress < 0.05 {
-            if anchor == .timerToggle || anchor == .counterPlus {
-                return true
-            }
-            return model.isActivityDocked && anchor == .tasksToggle
+            return anchor == .timerToggle || anchor == .counterPlus
         }
         guard progress > 0.5 else { return false }
         return anchor == .timerToggle || anchor == .counterPlus
