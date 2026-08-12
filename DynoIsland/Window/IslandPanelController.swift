@@ -64,6 +64,7 @@ final class IslandPanelController {
     private var cancellables = Set<AnyCancellable>()
     private var screenObserver: NSObjectProtocol?
     private var spaceObserver: NSObjectProtocol?
+    private var resignActiveObserver: NSObjectProtocol?
     private var localMouseMonitor: Any?
     private var globalMouseMonitor: Any?
     private var hoverPollTimer: Timer?
@@ -88,10 +89,20 @@ final class IslandPanelController {
     private var activeScreenID: ObjectIdentifier?
     /// Ekranlar arası yatay kayma (morph değil).
     private var isSlidingBetweenScreens = false
+    /// Kayma / hemen ardından daralma sırasında MC fade ve z-order düşmesini engelle.
+    private var suppressMissionControlUntil: CFTimeInterval = 0
+    /// Ekran kayması sonrası sabitlenmemiş collapse’ı ertele.
+    private var suppressHoverCollapseUntil: CFTimeInterval = 0
+    private var pendingAdoptScreenID: ObjectIdentifier?
+    private var adoptDebounceWork: DispatchWorkItem?
 
     /// Menü / tam ekran / diğer panellerin üstünde kalsın.
     private static var overlayLevel: NSWindow.Level {
         NSWindow.Level(Int(CGWindowLevelForKey(.popUpMenuWindow)) + 25)
+    }
+
+    private var isMissionControlSuppressed: Bool {
+        isSlidingBetweenScreens || CACurrentMediaTime() < suppressMissionControlUntil
     }
 
     init(model: AppModel) {
@@ -115,6 +126,9 @@ final class IslandPanelController {
         if let spaceObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(spaceObserver)
         }
+        if let resignActiveObserver {
+            NotificationCenter.default.removeObserver(resignActiveObserver)
+        }
         if let localMouseMonitor {
             NSEvent.removeMonitor(localMouseMonitor)
         }
@@ -127,11 +141,11 @@ final class IslandPanelController {
         frameAnimationTimer?.invalidate()
         frameAnimationLink?.invalidate()
         launchRevealTimer?.invalidate()
+        adoptDebounceWork?.cancel()
     }
 
     func show() {
-        adoptScreen(under: NSEvent.mouseLocation, animated: false)
-        reposition(animated: false)
+        lockToHomeScreen(animated: false)
         panel.orderFrontRegardless()
         joinNotchSpace(panel)
         pollHover()
@@ -179,14 +193,9 @@ final class IslandPanelController {
         launchRevealTimer = timer
     }
 
-    /// Paneli Space geçişlerinden tamamen muaf olan özel space'e taşı.
-    /// Çoklu ekranda CGS özel space ada kaybolmasına yol açtığı için
-    /// yalnızca tek ekranda kullanılır.
+    /// 3 parmak Space’te ada fiziksel ekranı (çentiği) takip etsin — masaüstü
+    /// kayarken ada yerinde kalsın. NotchSpace + stationary ile sabitlenir.
     private func joinNotchSpace(_ window: NSWindow, retries: Int = 8) {
-        if NSScreen.screens.count > 1 {
-            NotchSpace.shared.detach(window)
-            return
-        }
         if window.windowNumber > 0 {
             NotchSpace.shared.attach(window)
             return
@@ -196,6 +205,21 @@ final class IslandPanelController {
             guard let self, let window else { return }
             self.joinNotchSpace(window, retries: retries - 1)
         }
+    }
+
+    /// Ada tüm Space’lerde ana ekran çentiğinde sabit; diğer monitöre gitmez.
+    private func updateCollectionBehavior(slidingBetweenScreens: Bool = false) {
+        _ = slidingBetweenScreens
+        var behavior: NSWindow.CollectionBehavior = [
+            .canJoinAllSpaces,
+            .stationary,
+            .fullScreenAuxiliary,
+            .ignoresCycle
+        ]
+        if #available(macOS 13.0, *) {
+            behavior.insert(.canJoinAllApplications)
+        }
+        panel.collectionBehavior = behavior
     }
 
     func writeSnapshot(to url: URL) throws {
@@ -228,16 +252,7 @@ final class IslandPanelController {
         panel.ignoresMouseEvents = false
         panel.contentMinSize = .zero
         panel.contentMaxSize = NSSize(width: 2_000, height: 2_000)
-        panel.collectionBehavior = [
-            .canJoinAllSpaces,
-            .fullScreenAuxiliary,
-            // stationary kaldırıldı: çoklu ekranda ada kayarak gidebilsin.
-            // Spaces sabitliği NotchSpace ile sağlanıyor.
-            .ignoresCycle
-        ]
-        if #available(macOS 13.0, *) {
-            panel.collectionBehavior.insert(.canJoinAllApplications)
-        }
+        updateCollectionBehavior()
 
         let rootView = IslandRootView(model: model)
         let hosting = SolidHitHostingView(rootView: rootView)
@@ -257,12 +272,7 @@ final class IslandPanelController {
         ) { [weak self] _ in
             Task { @MainActor in
                 guard let self else { return }
-                if let id = self.activeScreenID,
-                   NSScreen.screens.contains(where: { ObjectIdentifier($0) == id }) {
-                    self.reposition(animated: false)
-                } else {
-                    self.adoptScreen(under: NSEvent.mouseLocation, animated: false)
-                }
+                self.lockToHomeScreen(animated: false)
             }
         }
 
@@ -272,14 +282,26 @@ final class IslandPanelController {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                // Spaces: ada çentikte sabit; geçiş bitince öne al + space'e yeniden bağla.
+                // Space bitti: ada hâlâ ana çentikte — frame + NotchSpace yenile.
                 guard let self else { return }
-                if self.missionControlProgress < 0.05 {
-                    self.panel.alphaValue = 1
-                    self.keepPanelsFrontmost()
-                    self.reposition(animated: false)
-                    self.joinNotchSpace(self.panel)
-                }
+                self.missionControlProgress = 0
+                self.pendingProgress = nil
+                self.panel.alphaValue = 1
+                self.lockToHomeScreen(animated: false)
+                self.enforceNotchAnchor()
+                self.refreshPanelPresence()
+            }
+        }
+
+        resignActiveObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didResignActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self else { return }
+                self.panel.alphaValue = 1
+                self.keepPanelsFrontmost()
             }
         }
     }
@@ -289,10 +311,17 @@ final class IslandPanelController {
             .removeDuplicates()
             .receive(on: RunLoop.main)
             .sink { [weak self] expanded in
-                if expanded {
-                    self?.makeInteractive()
+                guard let self else { return }
+                // Ekran kaymasını yarıda kesme — aksi halde ada ekranlar
+                // arasındaki boşlukta (off-screen) kalıyor.
+                if self.isSlidingBetweenScreens {
+                    self.pendingHoverInside = nil
+                    return
                 }
-                self?.reposition(animated: true)
+                if expanded {
+                    self.makeInteractive()
+                }
+                self.reposition(animated: true)
             }
             .store(in: &cancellables)
 
@@ -300,7 +329,8 @@ final class IslandPanelController {
             .removeDuplicates()
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.reposition(animated: true)
+                guard let self, !self.isSlidingBetweenScreens else { return }
+                self.reposition(animated: true)
             }
             .store(in: &cancellables)
 
@@ -308,7 +338,8 @@ final class IslandPanelController {
             .removeDuplicates()
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.reposition(animated: true)
+                guard let self, !self.isSlidingBetweenScreens else { return }
+                self.reposition(animated: true)
             }
             .store(in: &cancellables)
 
@@ -316,7 +347,10 @@ final class IslandPanelController {
             .removeDuplicates()
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                guard let self, self.model.isExpanded else { return }
+                guard let self,
+                      self.model.isExpanded,
+                      !self.isSlidingBetweenScreens,
+                      !self.isAnimatingFrame else { return }
                 self.reposition(animated: true)
             }
             .store(in: &cancellables)
@@ -326,7 +360,8 @@ final class IslandPanelController {
             .removeDuplicates()
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.reposition(animated: true)
+                guard let self, !self.isSlidingBetweenScreens, !self.isAnimatingFrame else { return }
+                self.reposition(animated: true)
             }
             .store(in: &cancellables)
     }
@@ -344,10 +379,16 @@ final class IslandPanelController {
         RunLoop.main.add(timer, forMode: .common)
         hoverPollTimer = timer
 
-        // Ada her zaman en üstte + çoklu ekran aynaları.
-        let front = Timer(timeInterval: 0.75, repeats: true) { [weak self] _ in
+        // Ada her zaman en üstte; çoklu ekranda daha sık öne al (kompakt z-order).
+        let frontInterval: TimeInterval = NSScreen.screens.count > 1 ? 0.22 : 0.75
+        let front = Timer(timeInterval: frontInterval, repeats: true) { [weak self] _ in
             guard let self else { return }
             DispatchQueue.main.async {
+                if self.isMissionControlSuppressed {
+                    self.panel.alphaValue = 1
+                    self.keepPanelsFrontmost()
+                    return
+                }
                 guard self.missionControlProgress < 0.05 else { return }
                 self.keepPanelsFrontmost()
             }
@@ -370,7 +411,6 @@ final class IslandPanelController {
         ) { [weak self] event in
             guard let self else { return event }
             if event.type == .leftMouseDown {
-                self.adoptScreen(under: NSEvent.mouseLocation, animated: true)
                 // Menü çubuğu/çentik bölgesinde SwiftUI tıklama almaz; AppKit’ten yönlendir.
                 if self.handleCompactControlClick(at: NSEvent.mouseLocation) {
                     return nil
@@ -389,7 +429,6 @@ final class IslandPanelController {
             DispatchQueue.main.async {
                 guard let self else { return }
                 if event.type == .leftMouseDown {
-                    self.adoptScreen(under: NSEvent.mouseLocation, animated: true)
                     // Uygulama aktif değilken de kompakt butonlar çalışsın.
                     _ = self.handleCompactControlClick(at: NSEvent.mouseLocation)
                 }
@@ -471,6 +510,8 @@ final class IslandPanelController {
 
     private func pollHover() {
         let mouse = NSEvent.mouseLocation
+        // Ada yalnızca ana ekranda — diğer monitörlere takip yok.
+
         let inside: Bool
         if model.isExpanded {
             if isPointerInside || pendingHoverInside == true {
@@ -482,7 +523,7 @@ final class IslandPanelController {
             inside = panelContaining(mouse) != nil
         }
 
-        if isAnimatingFrame {
+        if isAnimatingFrame || isSlidingBetweenScreens {
             pendingHoverInside = inside
             return
         }
@@ -497,6 +538,14 @@ final class IslandPanelController {
         // Kompakt Timer/Sayaç kontrolleri tıklanabilsin diye fare girince key yap.
         if inside, !model.isExpanded, (model.isActivityDocked || model.selectedTab.canDockToIsland) {
             makeInteractive()
+        }
+        // Ekran kayması sonrası collapse ikinci animasyonu kaymayı kesip adayı
+        // off-screen bırakıyordu (sabitliyken collapse yok → sorun yoktu).
+        if !inside,
+           !model.isPinned,
+           CACurrentMediaTime() < suppressHoverCollapseUntil {
+            model.syncPointerInside(false)
+            return
         }
         model.hoverChanged(isInside: inside)
     }
@@ -513,7 +562,7 @@ final class IslandPanelController {
     }
 
     private func reposition(animated: Bool) {
-        guard let screen = targetScreen() else { return }
+        guard let screen = homeScreen() else { return }
         let anchor = screenAnchor(for: screen)
 
         if abs(model.menuBarHeight - anchor.menuBarHeight) > 0.5 {
@@ -538,15 +587,18 @@ final class IslandPanelController {
         } else {
             size = anchor.collapsedSize
         }
-        let frame = NSRect(
-            x: (anchor.centerX - (size.width / 2)).rounded(.toNearestOrAwayFromZero),
-            y: (anchor.topY - size.height).rounded(.toNearestOrAwayFromZero),
-            width: size.width.rounded(.toNearestOrAwayFromZero),
-            height: size.height.rounded(.toNearestOrAwayFromZero)
+        let frame = clampFrame(
+            NSRect(
+                x: (anchor.centerX - (size.width / 2)).rounded(.toNearestOrAwayFromZero),
+                y: (anchor.topY - size.height).rounded(.toNearestOrAwayFromZero),
+                width: size.width.rounded(.toNearestOrAwayFromZero),
+                height: size.height.rounded(.toNearestOrAwayFromZero)
+            ),
+            to: screen
         )
         restPanelFrame = frame
 
-        if missionControlProgress > 0.01 {
+        if missionControlProgress > 0.01, !isMissionControlSuppressed {
             applyMissionControlVisuals(progress: missionControlProgress)
             return
         }
@@ -573,15 +625,29 @@ final class IslandPanelController {
     /// CGS space / MC fade ada kaybolmuş gibi görünüyor.
     private func beginScreenSlide() {
         isSlidingBetweenScreens = true
+        suppressMissionControlUntil = CACurrentMediaTime() + 1.25
+        suppressHoverCollapseUntil = CACurrentMediaTime() + 1.6
         missionControlProgress = 0
         pendingProgress = nil
+        model.cancelPendingHover()
+        isPointerInside = false
+        model.syncPointerInside(false)
         panel.alphaValue = 1
         NotchSpace.shared.detach(panel)
-        panel.orderFrontRegardless()
         panel.level = Self.overlayLevel
+        panel.orderFrontRegardless()
     }
 
     private func keepPanelsFrontmost() {
+        if isMissionControlSuppressed {
+            panel.alphaValue = 1
+            panel.level = Self.overlayLevel
+            if panel.isVisible {
+                panel.orderFrontRegardless()
+                joinNotchSpace(panel)
+            }
+            return
+        }
         guard missionControlProgress < 0.85 else { return }
         panel.level = Self.overlayLevel
         if panel.isVisible || missionControlProgress > 0.01 {
@@ -590,18 +656,57 @@ final class IslandPanelController {
         }
     }
 
+    /// NotchSpace + öne al — 3 parmakta fiziksel ekranı takip etsin.
+    private func refreshPanelPresence() {
+        panel.alphaValue = 1
+        panel.level = Self.overlayLevel
+        updateCollectionBehavior()
+        panel.orderFrontRegardless()
+        joinNotchSpace(panel)
+        panel.orderFrontRegardless()
+    }
+
+    /// Hedef ekranın frame’i içinde tut.
+    private func clampFrame(_ frame: NSRect, to screen: NSScreen) -> NSRect {
+        var f = frame
+        let bounds = screen.frame
+        if f.height > bounds.height {
+            f.size.height = bounds.height
+        }
+        if f.width > bounds.width {
+            f.size.width = bounds.width
+        }
+        if f.maxY > bounds.maxY {
+            f.origin.y = bounds.maxY - f.height
+        }
+        if f.minY < bounds.minY {
+            f.origin.y = bounds.minY
+        }
+        if f.minX < bounds.minX {
+            f.origin.x = bounds.minX
+        }
+        if f.maxX > bounds.maxX {
+            f.origin.x = bounds.maxX - f.width
+        }
+        return f
+    }
+
     private func pollMissionControlProgress() {
-        // Ekranlar arası kayarken MC sinyali yanlışlıkla alpha'yı 0 yapabiliyor.
-        guard !isSlidingBetweenScreens else { return }
+        guard !isMissionControlSuppressed else {
+            if panel.alphaValue < 0.999 { panel.alphaValue = 1 }
+            enforceNotchAnchor()
+            return
+        }
         updateMissionControlProgress()
+        // 3 parmak Space: her karede çentiğe kilitle — ekranı takip etsin.
         enforceNotchAnchor()
     }
 
-    /// Space geçişinde macOS paneli eski masaüstüyle birlikte kaydırabiliyor;
-    /// her karede çentik altındaki hedef kareye geri kilitle ve öne al.
+    /// Space kaydırırken macOS paneli sürüklemesin; ana ekran çentiğinde tut.
     private func enforceNotchAnchor() {
         guard missionControlProgress < 0.02,
               !isAnimatingFrame,
+              !isSlidingBetweenScreens,
               restPanelFrame.width > 1 else { return }
 
         if panel.alphaValue != 1 { panel.alphaValue = 1 }
@@ -641,10 +746,10 @@ final class IslandPanelController {
 
     /// 0…1 Mission Control ilerlemesi.
     ///
-    /// Geçiş sırasında Dock, masaüstünün küçültülmüş bir kopyasını adsız bir
-    /// masaüstü katmanı penceresi olarak çizer; bu pencerenin ölçeği parmakla
-    /// birebir değişir. Mission Control tam açıkken bu pencere kaybolur ve
-    /// yerine Dock'un tam ekran overlay pencereleri gelir.
+    /// Yalnızca gerçek Mission Control (üst swipe / F3): Dock’un küçültülmüş
+    /// masaüstü katmanı + tam ekran overlay’leri. 3 parmak yatay Space geçişi
+    /// bu sinyali üretmemeli — aksi halde ada yukarı kayıp kaybolur; Space’te
+    /// ada çentik / üst ortada sabit kalmalı.
     private static func estimateMissionControlProgress() -> CGFloat {
         guard let info = CGWindowListCopyWindowInfo(
             [.optionOnScreenOnly],
@@ -684,8 +789,15 @@ final class IslandPanelController {
             }
         }
 
-        if let transition { return min(1, transition) }
-        return fullScreenOverlays >= 2 ? 1 : 0
+        // Yatay Space swipe bazen zayıf transition penceresi üretir; yalnızca
+        // gerçek MC overlay’leriyle birlikte gizle.
+        if fullScreenOverlays >= 2 {
+            return transition.map { min(1, max($0, 0.85)) } ?? 1
+        }
+        if let transition, transition > 0.35, fullScreenOverlays >= 1 {
+            return min(1, transition)
+        }
+        return 0
     }
 
     private static func displayBounds(containing rect: CGRect) -> CGRect? {
@@ -733,6 +845,7 @@ final class IslandPanelController {
         stopFrameAnimation()
         isAnimatingFrame = false
         isSlidingBetweenScreens = false
+        updateCollectionBehavior()
         panel.alphaValue = 1
         panel.setFrame(frame, display: true)
         syncMorphProgress(height: frame.height)
@@ -754,15 +867,22 @@ final class IslandPanelController {
         if screenSlide {
             duration = 0.58
             isSlidingBetweenScreens = true
+            suppressMissionControlUntil = CACurrentMediaTime() + 1.25
         } else {
             duration = expanding ? 0.50 : 0.42
             isSlidingBetweenScreens = false
+            if CACurrentMediaTime() < suppressMissionControlUntil {
+                suppressMissionControlUntil = max(
+                    suppressMissionControlUntil,
+                    CACurrentMediaTime() + 0.9
+                )
+            }
         }
         let startTime = CACurrentMediaTime()
         isAnimatingFrame = true
-        if screenSlide {
-            panel.alphaValue = 1
-        }
+        panel.alphaValue = 1
+        panel.level = Self.overlayLevel
+        panel.orderFrontRegardless()
 
         let step: () -> Void = { [weak self] in
             guard let self else { return }
@@ -770,8 +890,6 @@ final class IslandPanelController {
             let elapsed = CACurrentMediaTime() - startTime
             let progress = min(1, elapsed / duration)
             let eased = screenSlide ? Self.easeInOutCubic(progress) : Self.springOut(progress)
-            // Üst kenardan yatay kayma: X yumuşak, Y her karede hedefe yakın
-            // tutularak ekranlar arası boşlukta kaybolmasın.
             let frame: NSRect
             if screenSlide {
                 let x = start.origin.x + (target.origin.x - start.origin.x) * eased
@@ -779,12 +897,17 @@ final class IslandPanelController {
                 let w = start.width + (target.width - start.width) * eased
                 let h = start.height + (target.height - start.height) * eased
                 frame = NSRect(x: x, y: y, width: w, height: h)
-                self.panel.alphaValue = 1
             } else {
                 frame = Self.lerp(start, target, eased)
             }
 
+            self.panel.alphaValue = 1
             self.panel.setFrame(frame, display: true)
+            self.panel.level = Self.overlayLevel
+            // Fiziksel ekran kaymasında her karede önde tut (sabitlenmemiş kompakt).
+            if screenSlide || NSScreen.screens.count > 1 {
+                self.panel.orderFrontRegardless()
+            }
             if !screenSlide {
                 self.syncMorphProgress(height: frame.height)
             }
@@ -795,11 +918,52 @@ final class IslandPanelController {
                 self.panel.setFrame(target, display: true)
                 self.syncMorphProgress(height: target.height)
                 self.isAnimatingFrame = false
+                let wasScreenSlide = screenSlide
                 self.isSlidingBetweenScreens = false
+                self.updateCollectionBehavior()
                 self.restPanelFrame = target
+                if wasScreenSlide {
+                    self.suppressMissionControlUntil = CACurrentMediaTime() + 1.4
+                }
                 self.panel.level = Self.overlayLevel
                 self.panel.orderFrontRegardless()
-                self.joinNotchSpace(self.panel)
+                if wasScreenSlide {
+                    self.panel.setFrame(target, display: true)
+                    self.restPanelFrame = target
+                    if let screen = self.homeScreen(),
+                       !screen.frame.intersects(self.panel.frame.insetBy(dx: 4, dy: 4)) {
+                        let clamped = self.clampFrame(target, to: screen)
+                        self.panel.setFrame(clamped, display: true)
+                        self.restPanelFrame = clamped
+                    }
+                    self.refreshPanelPresence()
+                } else {
+                    self.joinNotchSpace(self.panel)
+                    self.keepPanelsFrontmost()
+                    if CACurrentMediaTime() < self.suppressMissionControlUntil {
+                        self.refreshPanelPresence()
+                    }
+                }
+
+                DispatchQueue.main.async { [weak self] in
+                    self?.keepPanelsFrontmost()
+                }
+                if wasScreenSlide {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                        guard let self else { return }
+                        self.refreshPanelPresence()
+                        if let pending = self.pendingHoverInside {
+                            self.applyHover(pending)
+                        } else {
+                            self.pollHover()
+                        }
+                    }
+                    // Daralma 0.12s sonra gelebilir — bitince tekrar öne al.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) { [weak self] in
+                        self?.refreshPanelPresence()
+                    }
+                    return
+                }
 
                 if let pending = self.pendingHoverInside {
                     self.applyHover(pending)
@@ -872,7 +1036,6 @@ final class IslandPanelController {
     }
 
     private func screenAnchor(for screen: NSScreen) -> ScreenAnchor {
-        let topY = screen.frame.maxY
         let menuBarHeight = max(
             screen.frame.maxY - screen.visibleFrame.maxY,
             screen.safeAreaInsets.top,
@@ -885,6 +1048,9 @@ final class IslandPanelController {
 
         guard let leftArea = screen.auxiliaryTopLeftArea,
               let rightArea = screen.auxiliaryTopRightArea else {
+            // Çentiksiz (harici) ekran: kompakt ada menü çubuğunun ALTINDA dursun.
+            // Aksi halde sabitlenmemişken menü bandında kalıp z-order’da kayboluyor;
+            // sabitliyken geniş panel aşağı taştığı için “çalışıyor” gibi görünüyordu.
             let fallback = NSSize(
                 width: (Layout.fallbackCollapsed.width - Layout.collapsedWidthExtra + sideExtra)
                     .rounded(.toNearestOrAwayFromZero),
@@ -893,7 +1059,7 @@ final class IslandPanelController {
             return ScreenAnchor(
                 centerX: screen.frame.midX,
                 collapsedSize: fallback,
-                topY: topY,
+                topY: screen.visibleFrame.maxY,
                 menuBarHeight: menuBarHeight,
                 cornerRadius: Layout.notchCornerRadius
             )
@@ -909,14 +1075,15 @@ final class IslandPanelController {
             return ScreenAnchor(
                 centerX: screen.frame.midX,
                 collapsedSize: fallback,
-                topY: topY,
+                topY: screen.visibleFrame.maxY,
                 menuBarHeight: menuBarHeight,
                 cornerRadius: Layout.notchCornerRadius
             )
         }
 
+        // Çentikli ekran: ada fiziksel çentikte (frame.maxY).
+        let topY = screen.frame.maxY
         let notchHeight = max(leftArea.height, rightArea.height, screen.safeAreaInsets.top)
-        // Referans DI hapı: çentikten geniş; yükseklik ~2px daha sıkı.
         let collapsedWidth = (notchWidth + sideExtra)
             .rounded(.toNearestOrAwayFromZero)
         let collapsedHeight = max(notchHeight - 3, Layout.collapsedMinHeight)
@@ -931,26 +1098,23 @@ final class IslandPanelController {
         )
     }
 
-    private func targetScreen() -> NSScreen? {
-        if let id = activeScreenID,
-           let screen = NSScreen.screens.first(where: { ObjectIdentifier($0) == id }) {
-            return screen
+    /// Ana (tercihen çentikli) ekran — ada başka monitöre gitmez.
+    private func homeScreen() -> NSScreen? {
+        if let notched = NSScreen.screens.first(where: {
+            $0.auxiliaryTopLeftArea != nil && $0.auxiliaryTopRightArea != nil
+        }) {
+            return notched
         }
         return NSScreen.main ?? NSScreen.screens.first
     }
 
-    /// Tıklanan (veya fare altındaki) ekranı aktif yap; gerekirse üst kenardan
-    /// sola/sağa kayarak oraya taşı.
-    private func adoptScreen(under point: NSPoint, animated: Bool) {
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(point) })
-                ?? NSScreen.main
-                ?? NSScreen.screens.first else { return }
+    /// Ada her zaman ana ekranda kalsın.
+    private func lockToHomeScreen(animated: Bool) {
+        guard let screen = homeScreen() else { return }
         let id = ObjectIdentifier(screen)
-        if activeScreenID == id {
-            // Ekran hâlâ bağlı; yapılandırma değişmediyse çık.
-            return
-        }
         activeScreenID = id
+        adoptDebounceWork?.cancel()
+        pendingAdoptScreenID = nil
         reposition(animated: animated && panel.isVisible)
     }
 }

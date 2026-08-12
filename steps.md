@@ -1,5 +1,54 @@
 # Steps
 
+## 2026-08-12 — 3 parmak: fiziksel ekranı takip et
+
+1. NotchSpace + `stationary` + `canJoinAllSpaces` geri: 3 parmak Space’te ada
+   çentikte kalır (masaüstü kayarken ekranı takip eder).
+2. `enforceNotchAnchor` 60 Hz frame kilidi.
+3. Ada yalnızca ana (çentikli) ekranda — diğer monitör follow yok.
+
+## 2026-08-12 — 3 parmak Space ile kay + yalnızca ana ekran
+
+1. 3 parmak: NotchSpace / stationary / canJoinAllSpaces / frame kilidi kaldırıldı —
+   ada masaüstüyle birlikte kayar; Space bitince `moveToActiveSpace` + ana çentik.
+2. Fiziksel diğer monitörlere mouse-follow yok — ada sabit ana (çentikli) ekranda.
+
+## 2026-08-12 — Sabitlenmemiş kaybolma: off-screen kök neden
+
+1. Runtime dump: ada hiçbir ekranda değildi (harici maxY=896, ada y=899…938).
+2. Kayma yarıda kesiliyordu (`menuBarHeight` / `islandSideExtra` / collapse
+   reposition) → ekranlar arası boşlukta kalıyordu. Sabitliyken collapse yok.
+3. Kayma sırasında model sink’leri ignore; ekran debounce; collapse erteleme;
+   çoklu ekranda NotchSpace attach yok; frame clamp + bitişte hedefe kilitle.
+
+## 2026-08-12 — Sabitlenmemiş diğer ekranda kaybolma (kök neden)
+
+1. Sabitliyken geniş panel menü çubuğunun altına taşıyor → görünür.
+2. Sabit değilken kompakt ada çentiksiz ekranda menü bandında kalıp z-order’da
+   kayboluyordu. Çentiksiz ekranda `topY = visibleFrame.maxY` (menü altı).
+3. Ekran kayması / sonraki daralma sonrası `refreshPanelPresence` (NotchSpace
+   detach→attach + orderFront).
+
+## 2026-08-12 — Multi-screen z-order + 3 parmak Space üst ortada
+
+1. NotchSpace: yalnızca fiziksel ekran kayarken detach; yerleşince her zaman attach
+   (çoklu ekranda da) — sabitlenmemiş kompakt kaybolmasın, z-order korunur.
+2. Yerleşince `.stationary`; kayarken kaldır — ekranlar arası kayma çalışır.
+3. 3 parmak Space: MC gizleme yalnızca gerçek Mission Control; Space’te ada
+   çentik/üst ortada `enforceNotchAnchor` + NotchSpace ile sabit.
+4. `activeSpaceDidChange` sonrası frame kilidi + reattach.
+
+## 2026-08-12 — Sabitlenmemiş ada diğer ekranda z-order kaybolmasın
+
+1. Kayma sonrası settle: MC fade kapalı, alpha=1, her animasyon karesinde orderFront.
+2. Sabitlenmemiş daralmada da önde tut; çoklu ekranda keep-front sık + daha yüksek window level.
+3. App resign olunca da `keepPanelsFrontmost`.
+
+## 2026-08-12 — Ekran değişiminde sabitlenmemiş ada kaybolmasın
+
+1. Fare başka ekrana geçince `adoptScreen` (sadece tıklamada değil).
+2. Ekran kayması öncesi hover-collapse iptal; kayma bitene kadar hover ertelenir.
+
 ## 2026-08-12 — GitHub Pages yayını
 
 1. Landing static export + Actions workflow; site: https://hams-i.github.io/Dyno/

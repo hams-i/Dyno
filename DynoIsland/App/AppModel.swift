@@ -159,6 +159,21 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// Ekranlar arası kayma başlamadan bekleyen hover-collapse’ı iptal et —
+    /// aksi halde sabitlenmemiş ada kayarken küçülüp kayboluyor.
+    func cancelPendingHover() {
+        hoverExpansion?.cancel()
+        hoverCollapse?.cancel()
+        hoverExpansion = nil
+        hoverCollapse = nil
+    }
+
+    /// Pointer durumunu collapse/expand tetiklemeden güncelle (ekran kayması).
+    func syncPointerInside(_ inside: Bool) {
+        isPointerInside = inside
+        cancelPendingHover()
+    }
+
     func expandImmediately() {
         guard !isActivityDocked else { return }
         hoverExpansion?.cancel()
