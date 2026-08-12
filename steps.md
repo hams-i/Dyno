@@ -1,5 +1,10 @@
 # Steps
 
+## 2026-08-12 — GitHub Pages yayını
+
+1. Landing static export + Actions workflow; site: https://hams-i.github.io/Dyno/
+2. Commit/push main; Pages `build_type=workflow`.
+
 ## 2026-08-12 — Desktop boyutu + 404 redirect
 
 1. Scale yalnızca <640px telefonda; tablet/masaüstü yine full genişlik.
