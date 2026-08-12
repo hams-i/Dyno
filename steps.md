@@ -1,5 +1,161 @@
 # Steps
 
+## 2026-08-12 — Desktop boyutu + 404 redirect
+
+1. Scale yalnızca <640px telefonda; tablet/masaüstü yine full genişlik.
+2. `not-found.tsx` → `/` redirect.
+
+## 2026-08-12 — Mobil: yalnızca scale
+
+1. Ada/Mac layout sabit (720 tasarım genişliği); telefonda `transform: scale` ile küçülür.
+
+## 2026-08-12 — Küçülme + özellik swipe senkronu
+
+1. Ada küçülürken spring boyut animasyonu; compact/expanded fade.
+2. Alt özellik paneli ada sekme yönüyle sağdan/soldan kayıyor.
+
+## 2026-08-12 — Mobil / touch uyumluluğu
+
+1. Ada genişliği frame’e göre ölçekleniyor; dar ekranda ikon-only tab.
+2. Touch: hover kapalı; tap expand, wallpaper tap collapse; daha büyük hit alanları.
+3. Header / marka / Mac frame / media-timer-counter mobil düzen.
+
+## 2026-08-12 — Docked buton standardı + özellik metinleri
+
+1. Docked aksiyon + aşağı ok: hepsi 22px, aynı trailing grup / stil.
+2. Özellik eyebrow sadeleştirildi; EN/TR copy daha net anlatım.
+
+## 2026-08-12 — Docked ada aksiyon butonları
+
+1. Yukarı ok ile küçülünce timer play/pause ve counter + gerçek buton; tıklanabilir.
+
+## 2026-08-12 — Marka yan yana + eşmerkezli kapak
+
+1. Üst marka: Logo + AppName yan yana.
+2. Compact kapak: yükseklik ada−2×inset; sol r = adaR−inset (eşit çerçeve).
+
+## 2026-08-12 — Marka intro, GitHub, kapak, kartsız bölümler
+
+1. Header GitHub ikonu büyütüldü (size-6).
+2. Header altında ortalanmış Logo + AppName marka tanıtımı.
+3. Compact kapak: sol üst=alt dengeli yarıçap (app MorphingArtwork).
+4. Now Playing / Get: AppleGlass kartları kaldırıldı.
+
+## 2026-08-12 — Compact kapak radius + hero indirmeye taşındı
+
+1. Ada boyutunda Now Playing kapağı: 28px, inset 2.5, üst-sol 0 / alt-sol ada eğrisi.
+2. Hero (badge, slogan, alt yazı) Get Dyno Island bloğuna birleştirildi.
+
+## 2026-08-12 — Header–Mac boşluk + brand lockup
+
+1. Demo üst padding artırıldı (header ile Mac arası nefes).
+2. Header brand: logo + app name sade lockup.
+
+## 2026-08-12 — Light accent siyah
+
+1. Beyaz temada `--dyno-accent` siyah; dark’ta lime aynı.
+
+## 2026-08-12 — Header’a app ikonu
+
+1. App name soluna `DynoLogo` eklendi.
+
+## 2026-08-12 — Header: yalnızca app name + sağ kontroller
+
+1. Header: logo yok, yalnızca app name; nav yok.
+2. Sağda Dil / Tema / GitHub; dil ikonu kaldırıldı.
+
+## 2026-08-12 — Ada UX büyütme, header sade, kapak radius
+
+1. Ada: 660×296 / compact h40 — UX için büyütüldü.
+2. Header: yalnızca Logo + AppName; dil/tema + indirme en altta.
+3. Compact Now Playing kapak: sol radius = h/2 (app MorphingArtwork).
+
+## 2026-08-12 — Ekran alt fade, genişlik, OKLCH accent
+
+1. Mac ekran alt border kaldırıldı; mask ile sayfa zeminine eriyor.
+2. Ekran `w-full` — features ile aynı `max-w-6xl` hizası.
+3. Accent: `--dyno-hue` + OKLCH (light L↓ / dark L↑), hardcoded #D1FE25 yok.
+
+## 2026-08-12 — Siyah çentik kaldır, Mac bezel border
+
+1. Ada arkasındaki siyah kanat/çentik bandı kaldırıldı.
+2. Mac ekranına ince alüminyum + iç bezel çıkıntısı eklendi.
+
+## 2026-08-12 — Wallpaper, Bengü İki Melek, ada border
+
+1. Ada etrafındaki hairline border kaldırıldı.
+2. Mac frame: gerçek masaüstü `wallpaper.jpg`.
+3. Now Playing: Bengü — İki Melek, 4:10, beyaz `album-art.jpg`.
+
+## 2026-08-12 — Ada üst radius her zaman 0
+
+1. Compact + expanded: `borderTopLeft/RightRadius: 0` (app `UnevenRoundedRectangle`).
+2. Alt: compact `COMPACT_H/2`, expanded `22`.
+
+## 2026-08-12 — Expanded ada üst radius 0
+
+1. Border-radius Framer ile: expanded → topL/topR = 0, bottom = 22; compact → pill.
+2. Ada Mac frame overflow dışına alındı — çerçeve yuvarlaklığı üst köşeleri kesmiyor.
+
+## 2026-08-12 — Ada animasyon + medya/pano ayrımı
+
+1. Küçültme: `layout`/spring overshoot kaldırıldı; ease-out tween, clip morph.
+2. Sekmeler: absolute carousel (`inset-0` + % translate) — Now Playing / Pano karışması bitti.
+
+## 2026-08-12 — Landing ada hover küçültme (yukarı)
+
+1. Hover enter ~80ms → genişle; leave ~120ms → yukarı küçül (app parity).
+2. Pin açıkken küçülmez; dock’ta yalnızca aşağı ok ile açılır.
+3. `origin-top` + spring height — panel çentiğe doğru kapanır.
+
+## 2026-08-12 — Logo, sekme detayı, medya süre/buton fix
+
+1. AppIcon → `public/logo.png` + `DynoLogo`; header, hero, download, footer, favicon.
+2. "Built for the notch" kartları kaldırıldı; aktif ada sekmesine göre detay paneli.
+3. Sayfa ölçümü padding dışı ref — süre panoya taşma düzeltildi.
+4. Medya satırı uygulama ile aynı: elapsed | −10 | +10 | spacer | duration.
+
+## 2026-08-12 — Landing: dark varsayılan, ada konumu, medya süre fix
+
+1. Varsayılan dark: `html.dark`, `enableSystem={false}`, `storageKey`.
+2. Finder/menü çubuğu kaldırıldı; ada `top-0` çentik kanatlarıyla aynı hizada.
+3. Now Playing bitiş süresi: grid layout + sayfa `overflow-hidden` + sabit içerik genişliği.
+
+## 2026-08-12 — Apple UI tasarım sistemi + lint düzeltmeleri
+
+1. Apple HIG renkleri (`#f5f5f7`, `#1d1d1f`, `#6e6e73`), SF Pro system font stack.
+2. Yeni bileşenler: `AppleGlass`, `AppleButton` — glass panel ve pill butonlar.
+3. `SiteHeader`: vibrancy navbar, segmented dil/tema kontrolleri.
+4. `LandingPage`: Apple hero tipografi, glass feature kartları, gradient arka plan.
+5. `MacNotchFrame`: alüminyum bezel, Sonoma wallpaper, SF menü çubuğu.
+6. Hata düzeltmeleri: `pageWidth` ResizeObserver, ref-in-render, nested button,
+   locale `useSyncExternalStore`, `DotPattern` deterministik animasyon.
+
+## 2026-08-12 — Landing ada = uygulama, Mac çentik çerçevesi
+
+1. `MacNotchFrame`: MacBook üst bezel, çentik, menü çubuğu, duvar kağıdı — ada
+   üst kenara oturur (kart kutusu kaldırıldı).
+2. `DynamicIslandDemo` uygulamayla eşleştirildi:
+   - 600×268 geniş panel, 32px menü çubuğu spacer, üst düz / alt yuvarlak ada.
+   - Sekmeler panel içinde (liquid kapsül gösterge + kaydırma).
+   - Medya: 16:9 kapak, prev/play/next; ±10 yalnızca timeline satırında.
+   - Sayaç: not sol, − / + / sıfırla sağ (split layout).
+   - Pano: 3 sütun grid, kopyala geri bildirimi, başlıkta sayı + temizle.
+   - Başlık aksesuarları: sabitle, ayarlar, pano sayısı/çöp, chevron.up (ada).
+   - Kompakt ada: morph kapak, waveform, dock chevron.down.
+3. i18n: pinned, collapseToIsland, clipboard.copied, counter.notePlaceholder vb.
+
+## 2026-08-12 — Landing page (Magic UI + canlı Dynamic Island demo)
+
+1. `landing/` Next.js 16 projesi: Magic UI MCP kuruldu (`pnpm dlx
+   @magicuidesign/cli@latest install cursor`), shadcn + shimmer-button,
+   blur-fade, dot-pattern eklendi.
+2. Statik ekran görüntüsü yerine `DynamicIslandDemo` — medya/pano/timer/sayaç
+   sekmeleri, genişlet/küçült, liquid tab pill, 16:9 kapak, waveform.
+3. Üst nav: logo + site sekmeleri; demo alanında ada sekmeleri + island.
+4. EN/TR (`LocaleProvider`), tema Dark/Light/System (`next-themes`).
+5. Renkler: siyah zemin / beyaz metin (dark), accent `#D1FE25`.
+
 ## 2026-08-10 — ±10 timeline altına, README img, ekran kayması fix, 16:9 kapak
 
 1. −10s / +10s tekrar zaman çizelgesinin altında (önceki yerleşim).
