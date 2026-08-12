@@ -14,6 +14,7 @@ enum L10n {
     // Tabs
     static var tabNowPlaying: String { t("Şimdi Çalıyor", "Now Playing") }
     static var tabClipboard: String { t("Pano", "Clipboard") }
+    static var tabTasks: String { t("Görevler", "Tasks") }
     static var tabTimer: String { t("Zamanlayıcı", "Timer") }
     static var tabCounter: String { t("Sayaç", "Counter") }
 
@@ -61,6 +62,39 @@ enum L10n {
     static var copiedImage: String { t("Kopyalanan görsel", "Copied image") }
     static func fileCount(_ n: Int) -> String {
         t("\(n) dosya", "\(n) files")
+    }
+
+    // Tasks
+    static var tasksEmptyTitle: String { t("Henüz görev yok", "No tasks yet") }
+    static var tasksEmptyHint: String {
+        t("Yukarıdan yeni bir görev ekle.", "Add a new task above.")
+    }
+    static var tasksEmptyFilterTitle: String {
+        t("Bu filtrede görev yok", "Nothing in this filter")
+    }
+    static var tasksPlaceholder: String { t("Görev ekle…", "Add a task…") }
+    static var tasksAdd: String { t("Görev ekle", "Add task") }
+    static var tasksFilterAll: String { t("Tümü", "All") }
+    static var tasksFilterActive: String { t("Aktif", "Active") }
+    static var tasksFilterCompleted: String { t("Tamamlanan", "Completed") }
+    static var tasksCompleteNext: String {
+        t("Seçili görevi tamamla", "Complete selected task")
+    }
+    static var tasksDelete: String { t("Görevi sil", "Delete task") }
+    static var tasksClearCompleted: String {
+        t("Tamamlananları temizle", "Clear completed")
+    }
+    static var tasksActiveCountLabel: String {
+        t("aktif görev", "active")
+    }
+    static var tasksShowOnIsland: String {
+        t("Adada göster", "Show on island")
+    }
+    static func tasksCreatedAt(_ value: String) -> String {
+        t("Oluşturuldu \(value)", "Created \(value)")
+    }
+    static func tasksCompletedAt(_ value: String) -> String {
+        t("Tamamlandı \(value)", "Completed \(value)")
     }
 
     // Timer / Counter

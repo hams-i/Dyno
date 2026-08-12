@@ -19,6 +19,10 @@ enum DynoDataStore {
     static var clipboardURL: URL {
         rootDirectory.appendingPathComponent("clipboard-history.json")
     }
+
+    static var tasksURL: URL {
+        rootDirectory.appendingPathComponent("tasks.json")
+    }
 }
 
 struct PersistedActivities: Codable, Equatable {

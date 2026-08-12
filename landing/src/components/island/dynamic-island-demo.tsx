@@ -14,6 +14,8 @@ import {
   ChevronUp,
   ClipboardList,
   CirclePlus,
+  ListChecks,
+  Check,
   Minus,
   Pause,
   Pin,
@@ -34,16 +36,19 @@ import { MacNotchFrame } from "./mac-notch-frame";
 import { VoiceBars } from "./voice-bars";
 import { cn } from "@/lib/utils";
 
-export type IslandTab = "media" | "clipboard" | "timer" | "counter";
+export type IslandTab = "media" | "clipboard" | "tasks" | "timer" | "counter";
 
-const tabs: IslandTab[] = ["media", "clipboard", "timer", "counter"];
+const tabs: IslandTab[] = ["media", "clipboard", "tasks", "timer", "counter"];
 
 const tabIcons: Record<IslandTab, typeof AudioLines> = {
   media: AudioLines,
   clipboard: ClipboardList,
+  tasks: ListChecks,
   timer: Timer,
   counter: CirclePlus,
 };
+
+const dockableTabs: IslandTab[] = ["clipboard", "tasks", "timer", "counter"];
 
 const EXPANDED_W = 660;
 const EXPANDED_H = 248;
@@ -70,6 +75,12 @@ const CLIP_IDS = [
 ] as const;
 
 type ClipItem = { id: string; text: string };
+
+type TaskItem = {
+  id: string;
+  title: string;
+  completed: boolean;
+};
 
 function formatTimer(ms: number) {
   const cs = Math.floor(ms / 10);
@@ -123,6 +134,19 @@ export function DynamicIslandDemo({
 
   const [count, setCount] = useState(12);
   const [counterNote, setCounterNote] = useState("");
+
+  const [tasks, setTasks] = useState<TaskItem[]>(() =>
+    t.tasks.samples.map((title, i) => ({
+      id: `t${i + 1}`,
+      title,
+      completed: i === 2,
+    })),
+  );
+  const [selectedTaskId, setSelectedTaskId] = useState("t1");
+  const [taskDraft, setTaskDraft] = useState("");
+  const [taskFilter, setTaskFilter] = useState<"all" | "active" | "completed">(
+    "all",
+  );
 
   const clipSamples = useMemo(() => {
     const map: Record<string, string> = {};
@@ -272,6 +296,7 @@ export function DynamicIslandDemo({
   const tabLabels: Record<IslandTab, string> = {
     media: t.islandTabs.media,
     clipboard: t.islandTabs.clipboard,
+    tasks: t.islandTabs.tasks,
     timer: t.islandTabs.timer,
     counter: t.islandTabs.counter,
   };
@@ -375,11 +400,71 @@ export function DynamicIslandDemo({
 
   const clearClipboard = () => setHiddenClipIds(new Set(CLIP_IDS));
 
+  const filteredTasks = useMemo(() => {
+    if (taskFilter === "active") return tasks.filter((t) => !t.completed);
+    if (taskFilter === "completed") return tasks.filter((t) => t.completed);
+    return tasks;
+  }, [tasks, taskFilter]);
+
+  const selectedTask = tasks.find((t) => t.id === selectedTaskId);
+  const islandTaskLabel = selectedTask
+    ? selectedTask.title.trim().slice(0, 8) || "—"
+    : "—";
+
+  const addTask = () => {
+    const title = taskDraft.trim();
+    if (!title) return;
+    const id = `t${Date.now()}`;
+    setTasks((prev) => [{ id, title, completed: false }, ...prev]);
+    setSelectedTaskId(id);
+    setTaskDraft("");
+  };
+
+  const toggleTask = (id: string) => {
+    setTasks((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, completed: !item.completed } : item,
+      ),
+    );
+  };
+
+  const completeSelectedTask = () => {
+    if (!selectedTask || selectedTask.completed) return;
+    setTasks((prev) =>
+      prev.map((item) =>
+        item.id === selectedTaskId ? { ...item, completed: true } : item,
+      ),
+    );
+    const next = tasks.find(
+      (item) => item.id !== selectedTaskId && !item.completed,
+    );
+    if (next) setSelectedTaskId(next.id);
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks((prev) => prev.filter((item) => item.id !== id));
+    if (selectedTaskId === id) {
+      const remaining = tasks.filter((item) => item.id !== id);
+      setSelectedTaskId(
+        remaining.find((item) => !item.completed)?.id ?? remaining[0]?.id ?? "",
+      );
+    }
+  };
+
   // Sadece dar telefon: sabit tasarım genişliğine scale. Tablet/masaüstü: tam genişlik.
   const usePhoneScale = shellWidth > 0 && shellWidth < 640;
   const scale = usePhoneScale ? Math.min(1, shellWidth / DESIGN_W) : 1;
   const compactWidth =
-    tab === "media" ? 360 : tab === "clipboard" ? 220 : 270;
+    tab === "media"
+      ? 360
+      : tab === "clipboard"
+        ? 220
+        : tab === "tasks"
+          ? 280
+          : 270;
+  const showVoiceBars =
+    !isDocked && (tab === "media" || tab === "clipboard" || tab === "tasks");
+  const canDock = dockableTabs.includes(tab);
   const targetW = expanded ? EXPANDED_W : compactWidth;
   const targetH = expanded ? EXPANDED_H : COMPACT_H;
   const dragPct = pageWidth > 0 ? (dragX / pageWidth) * 100 : 0;
@@ -466,9 +551,15 @@ export function DynamicIslandDemo({
                   timerLabel={formatTimer(timerMs)}
                   count={count}
                   clipCount={clipItems.length}
+                  taskLabel={islandTaskLabel}
                 />
-                {tab === "media" && (
-                  <VoiceBars playing={playing} className="mr-2.5" />
+                {showVoiceBars && (
+                  <VoiceBars
+                    playing={
+                      tab === "media" ? playing : true
+                    }
+                    className="mr-2.5"
+                  />
                 )}
               </button>
 
@@ -502,6 +593,21 @@ export function DynamicIslandDemo({
                     aria-label={t.counter.increase}
                   >
                     <Plus className="size-2.5" />
+                  </button>
+                )}
+
+                {tab === "tasks" && isDocked && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      completeSelectedTask();
+                    }}
+                    disabled={!selectedTask || selectedTask.completed}
+                    className="flex size-[22px] items-center justify-center rounded-full bg-[#2b2b2e] text-white ring-1 ring-white/15 disabled:opacity-35"
+                    aria-label={t.tasks.completeSelected}
+                  >
+                    <Check className="size-2.5" />
                   </button>
                 )}
 
@@ -566,7 +672,7 @@ export function DynamicIslandDemo({
                       {t.controls.pinned}
                     </span>
                   )}
-                  {(tab === "timer" || tab === "counter") && (
+                  {(canDock) && (
                     <IconBtn
                       label={t.controls.collapseToIsland}
                       onClick={dockToIsland}
@@ -639,6 +745,20 @@ export function DynamicIslandDemo({
                         onCopy={copyItem}
                       />
                     )}
+                    {id === "tasks" && (
+                      <TasksPage
+                        tasks={filteredTasks}
+                        selectedId={selectedTaskId}
+                        draft={taskDraft}
+                        filter={taskFilter}
+                        onDraftChange={setTaskDraft}
+                        onFilterChange={setTaskFilter}
+                        onAdd={addTask}
+                        onSelect={setSelectedTaskId}
+                        onToggle={toggleTask}
+                        onDelete={deleteTask}
+                      />
+                    )}
                     {id === "timer" && (
                       <TimerPage
                         label={formatTimer(timerMs)}
@@ -680,11 +800,13 @@ function CompactLead({
   timerLabel,
   count,
   clipCount,
+  taskLabel,
 }: {
   tab: IslandTab;
   timerLabel: string;
   count: number;
   clipCount: number;
+  taskLabel: string;
 }) {
   if (tab === "media") {
     // Ada: üst 0, alt COMPACT_H/2. Kapak inset 2.5 ile eşmerkezli iç eğri.
@@ -728,11 +850,24 @@ function CompactLead({
     );
   }
 
+  if (tab === "tasks") {
+    return (
+      <span
+        className="max-w-[72px] truncate pl-2 text-xs font-semibold"
+        style={{
+          maskImage:
+            "linear-gradient(90deg, #000 0%, #000 55%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(90deg, #000 0%, #000 55%, transparent 100%)",
+        }}
+      >
+        {taskLabel}
+      </span>
+    );
+  }
+
   return (
-    <>
-      <ClipboardList className="ml-2 size-3.5 text-white/50" />
-      <span className="mr-2 text-[10px] text-white/40">{clipCount}</span>
-    </>
+    <span className="pl-2 text-sm font-bold tabular-nums">{clipCount}</span>
   );
 }
 
@@ -960,6 +1095,172 @@ function MediaPage({
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+function TasksPage({
+  tasks,
+  selectedId,
+  draft,
+  filter,
+  onDraftChange,
+  onFilterChange,
+  onAdd,
+  onSelect,
+  onToggle,
+  onDelete,
+}: {
+  tasks: TaskItem[];
+  selectedId: string;
+  draft: string;
+  filter: "all" | "active" | "completed";
+  onDraftChange: (value: string) => void;
+  onFilterChange: (value: "all" | "active" | "completed") => void;
+  onAdd: () => void;
+  onSelect: (id: string) => void;
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  const { t } = useLocale();
+  const filters: Array<"all" | "active" | "completed"> = [
+    "all",
+    "active",
+    "completed",
+  ];
+  const filterLabel = {
+    all: t.tasks.filterAll,
+    active: t.tasks.filterActive,
+    completed: t.tasks.filterCompleted,
+  } as const;
+
+  return (
+    <div className="flex h-full flex-col gap-2.5 overflow-hidden" data-no-swipe>
+      <div className="flex shrink-0 items-center gap-2">
+        <input
+          value={draft}
+          onChange={(e) => onDraftChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onAdd();
+          }}
+          placeholder={t.tasks.placeholder}
+          className={cn(
+            "h-[30px] min-w-0 flex-1 rounded-full border px-3 text-[12.5px] font-medium outline-none",
+            "border-white/[0.08] bg-white/[0.06] text-white/92 placeholder:text-white/32",
+            "focus:border-transparent focus:bg-white focus:text-black focus:placeholder:text-black/35",
+          )}
+        />
+        <button
+          type="button"
+          onClick={onAdd}
+          disabled={!draft.trim()}
+          aria-label={t.tasks.add}
+          className="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-[#2b2b2e] text-white ring-1 ring-white/15 disabled:opacity-35"
+        >
+          <Plus className="size-3" />
+        </button>
+        <div className="flex shrink-0 items-center rounded-full bg-white/[0.05] p-0.5">
+          {filters.map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onFilterChange(key)}
+              className={cn(
+                "h-[26px] rounded-full px-2 text-[10px] font-semibold",
+                filter === key
+                  ? "bg-white/12 text-white"
+                  : "text-white/42",
+              )}
+            >
+              {filterLabel[key]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {tasks.length === 0 ? (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 py-4 text-center">
+          <ListChecks className="size-6 text-white/32" />
+          <p className="text-[13px] font-semibold text-white/80">
+            {t.tasks.empty}
+          </p>
+          <p className="text-[11px] text-white/36">{t.tasks.emptyHint}</p>
+        </div>
+      ) : (
+        <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto apple-scrollbar">
+          {tasks.map((task) => {
+            const selected = task.id === selectedId;
+            return (
+              <button
+                key={task.id}
+                type="button"
+                onClick={() => onSelect(task.id)}
+                className={cn(
+                  "group flex w-full items-center gap-2.5 rounded-[12px] border px-2.5 py-2 text-left transition",
+                  selected
+                    ? "border-dyno-accent/70 bg-white/[0.12]"
+                    : "border-white/[0.05] bg-white/[0.04] hover:border-white/14 hover:bg-white/[0.08]",
+                )}
+              >
+                <span
+                  role="checkbox"
+                  aria-checked={task.completed}
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggle(task.id);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onToggle(task.id);
+                    }
+                  }}
+                  className="flex size-[22px] shrink-0 items-center justify-center text-white/72"
+                >
+                  {task.completed ? (
+                    <Check className="size-3.5 text-white/35" />
+                  ) : (
+                    <span className="size-3.5 rounded-full border border-white/55" />
+                  )}
+                </span>
+                <span
+                  className={cn(
+                    "min-w-0 flex-1 truncate text-[12.5px] font-medium",
+                    task.completed
+                      ? "text-white/38 line-through"
+                      : "text-white/92",
+                  )}
+                >
+                  {task.title}
+                </span>
+                <span className="flex size-[22px] shrink-0 items-center justify-center">
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={t.tasks.delete}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(task.id);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onDelete(task.id);
+                      }
+                    }}
+                    className="flex size-[22px] items-center justify-center text-white/45 opacity-0 transition group-hover:opacity-100"
+                  >
+                    <Trash2 className="size-2.5" />
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

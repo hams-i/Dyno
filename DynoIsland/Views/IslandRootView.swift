@@ -7,6 +7,9 @@ import SwiftUI
 /// yuva (`morphSlot`) tutar, öğenin kendisi üst katmanda çizilir.
 enum MorphAnchor: Hashable {
     case mediaArtwork
+    case clipboardCount
+    case tasksCount
+    case tasksToggle
     case timerDisplay
     case timerToggle
     case counterValue
@@ -156,14 +159,17 @@ struct MorphElement<Content: View>: View {
             .allowsHitTesting(isHitEnabled)
     }
 
-    /// Ada: play/+ için. Geniş panel: yalnızca kendi sayfasındayken ve
-    /// etkileşimli ankorda (toggle/plus).
+    /// Ada: play/+ her zaman; tasks tik yalnızca dock’luyken.
+    /// Geniş panel: yalnızca kendi sayfasındayken etkileşimli ankorda.
     private var isHitEnabled: Bool {
         guard visibility > 0.85 else { return false }
         let pageDistance = abs(model.pageScroll - model.restScroll(for: tab))
         guard pageDistance < max(model.pageWidth, 1) * 0.45 else { return false }
         if progress < 0.05 {
-            return anchor == .timerToggle || anchor == .counterPlus
+            if anchor == .timerToggle || anchor == .counterPlus {
+                return true
+            }
+            return model.isActivityDocked && anchor == .tasksToggle
         }
         guard progress > 0.5 else { return false }
         return anchor == .timerToggle || anchor == .counterPlus
@@ -175,8 +181,8 @@ struct MorphElement<Content: View>: View {
         (model.pageScroll - model.restScroll(for: tab)) * progress
     }
 
-    /// Ada: seçili sekme. Geniş: sayfa mesafesine göre — kaydırırken komşu
-    /// sayfa öğeleri de görünür, dinlenirken yalnız ortadaki.
+    /// Ada: seçili sekmenin morph öğeleri (sol veri + kontroller).
+    /// Geniş: sayfa mesafesine göre.
     private var visibility: CGFloat {
         if progress < 0.05 {
             return model.selectedTab == tab ? 1 : 0
@@ -297,6 +303,8 @@ struct IslandRootView: View {
                 IslandMorphLayer(
                     timer: model.timer,
                     counter: model.counter,
+                    clipboard: model.clipboard,
+                    tasks: model.tasks,
                     panelSize: panelSize
                 )
             }

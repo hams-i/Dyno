@@ -142,6 +142,8 @@ struct ExpandedIslandView: View {
             MediaTabView(service: model.nowPlaying)
         case .clipboard:
             ClipboardTabView(service: model.clipboard)
+        case .tasks:
+            TasksTabView(service: model.tasks)
         case .timer:
             TimerTabView(service: model.timer)
         case .counter:
@@ -231,14 +233,15 @@ struct ExpandedIslandView: View {
     }
 
     private func tabLabel(_ tab: IslandTab, isActive: Bool) -> some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 4) {
             Image(systemName: tab.symbol)
                 .font(.system(size: 10, weight: .semibold))
             Text(tab.title)
-                .font(.system(size: 10.5, weight: .semibold))
+                .font(.system(size: 10, weight: .semibold))
+                .lineLimit(1)
         }
         .foregroundStyle(isActive ? Color.white : Color.white.opacity(0.42))
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 8)
         .frame(height: 28)
     }
 
@@ -265,14 +268,6 @@ struct ExpandedIslandView: View {
             .buttonStyle(.plain)
             .disabled(model.clipboard.entries.isEmpty)
             .help(L10n.clipboardClearHelp)
-        }
-
-        if model.isPinned {
-            Text(L10n.pinned)
-                .font(.system(size: 9, weight: .bold))
-                .tracking(0.6)
-                .textCase(.uppercase)
-                .foregroundStyle(Color.accentColor.opacity(0.9))
         }
 
         if model.selectedTab.canDockToIsland {
@@ -355,6 +350,7 @@ private struct TabFramesKey: PreferenceKey {
 }
 
 /// Trackpad yatay kaydırmasını parmakla birebir sayfa kaymasına çevirir.
+/// Dikey scroll başladıysa yatay sekme geçişi kilitlenir.
 private struct HorizontalTabSwipeCatcher: NSViewRepresentable {
     var isEnabled: Bool
     var onChange: (CGFloat) -> Void
@@ -372,13 +368,19 @@ private struct HorizontalTabSwipeCatcher: NSViewRepresentable {
     }
 
     final class CatcherView: NSView {
+        private enum AxisLock {
+            case undecided
+            case horizontal
+            case vertical
+        }
+
         private var isEnabled = false
         private var onChange: ((CGFloat) -> Void)?
         private var onEnd: (() -> Void)?
         private var onStep: ((Int) -> Void)?
 
         private var monitor: Any?
-        private var isTracking = false
+        private var axisLock: AxisLock = .undecided
         private var lastStepTime: TimeInterval = 0
 
         func apply(
@@ -391,7 +393,9 @@ private struct HorizontalTabSwipeCatcher: NSViewRepresentable {
             self.onChange = onChange
             self.onEnd = onEnd
             self.onStep = onStep
-            if !isEnabled { isTracking = false }
+            if !isEnabled {
+                axisLock = .undecided
+            }
         }
 
         override func hitTest(_ point: NSPoint) -> NSView? { nil }
@@ -422,12 +426,10 @@ private struct HorizontalTabSwipeCatcher: NSViewRepresentable {
                 NSEvent.removeMonitor(monitor)
                 self.monitor = nil
             }
-            isTracking = false
+            axisLock = .undecided
         }
 
         private func handle(_ event: NSEvent) -> Bool {
-            // Panel kapalıyken geniş yerleşim sahnede ama görünmez; kaydırma
-            // olayları o haldeyken yutulmamalı.
             guard isEnabled else { return false }
 
             let dx = event.scrollingDeltaX
@@ -435,37 +437,60 @@ private struct HorizontalTabSwipeCatcher: NSViewRepresentable {
 
             switch event.phase {
             case .began:
-                isTracking = abs(dx) >= abs(dy)
-                return isTracking
+                axisLock = .undecided
+                return false
             case .changed:
-                if !isTracking {
-                    // Yatay baskınlaşırsa gesture ortasında da devral.
-                    guard abs(dx) > abs(dy) * 1.1, abs(dx) > 0.6 else { return false }
-                    isTracking = true
-                }
-                onChange?(dx)
-                return true
+                return handleChanged(dx: dx, dy: dy)
             case .ended, .cancelled:
-                guard isTracking else { return false }
-                isTracking = false
-                onEnd?()
-                return true
+                let wasHorizontal = axisLock == .horizontal
+                axisLock = .undecided
+                if wasHorizontal {
+                    onEnd?()
+                    return true
+                }
+                return false
             default:
                 break
             }
 
-            // Momentum: sürükleme bittikten sonra gelen kuyruk yutulur.
+            // Momentum: yalnızca yatay kilitliyken yut; dikey scroll’a dokunma.
             if event.momentumPhase != [] {
-                return isTracking
+                return axisLock == .horizontal
             }
 
-            // Klasik tekerlek / kesikli yatay kaydırma.
-            guard abs(dx) > abs(dy) * 1.1, abs(dx) > 0.6 else { return false }
+            // Klasik tekerlek / kesikli yatay kaydırma — dikey baskınsa alma.
+            guard abs(dx) > abs(dy) * 1.6, abs(dx) > 0.8 else { return false }
             let now = ProcessInfo.processInfo.systemUptime
-            guard now - lastStepTime > 0.3 else { return true }
+            guard now - lastStepTime > 0.35 else { return true }
             lastStepTime = now
             onStep?(dx < 0 ? 1 : -1)
             return true
+        }
+
+        private func handleChanged(dx: CGFloat, dy: CGFloat) -> Bool {
+            switch axisLock {
+            case .vertical:
+                // Dikey scroll başladıysa sağ-sol sekme geçişi yok.
+                return false
+            case .horizontal:
+                onChange?(dx)
+                return true
+            case .undecided:
+                let absX = abs(dx)
+                let absY = abs(dy)
+                // Önce dikey — hafif yatay bileşen sekme değiştirmesin.
+                if absY > 0.45, absY >= absX * 0.85 {
+                    axisLock = .vertical
+                    return false
+                }
+                // Yatay için daha net baskınlık iste.
+                if absX > 0.9, absX > absY * 1.45 {
+                    axisLock = .horizontal
+                    onChange?(dx)
+                    return true
+                }
+                return false
+            }
         }
     }
 }

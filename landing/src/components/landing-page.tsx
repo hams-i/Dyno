@@ -13,7 +13,7 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import { useLocale } from "@/context/locale-context";
 
-const featureTabs: IslandTab[] = ["media", "clipboard", "timer", "counter"];
+const featureTabs: IslandTab[] = ["media", "clipboard", "tasks", "timer", "counter"];
 
 const featureSlide = {
   enter: (dir: number) => ({

@@ -211,8 +211,8 @@ private struct InfoSettingsPane: View {
 
             Text(
                 turkish
-                    ? "Dyno Island; şimdi çalıyor, pano geçmişi, timer ve sayaç özelliklerini Dynamic Island benzeri bir panelde birleştirir. İşaretçi çentiğin üzerindeyken genişler, istediğinizde sabitlenir veya adaya küçülür."
-                    : "Dyno Island brings Now Playing, clipboard history, a timer, and a counter into a Dynamic Island–style panel. It expands when you hover the notch, pins when you want it to stay, and collapses back into the island."
+                    ? "Dyno Island; şimdi çalıyor, pano geçmişi, görevler, timer ve sayaç özelliklerini Dynamic Island benzeri bir panelde birleştirir. İşaretçi çentiğin üzerindeyken genişler, istediğinizde sabitlenir veya adaya küçülür."
+                    : "Dyno Island brings Now Playing, clipboard history, tasks, a timer, and a counter into a Dynamic Island–style panel. It expands when you hover the notch, pins when you want it to stay, and collapses back into the island."
             )
             .font(.system(size: 13))
             .foregroundStyle(.secondary)
@@ -228,7 +228,12 @@ private struct InfoSettingsPane: View {
                 featureChip(
                     symbol: "doc.on.clipboard",
                     title: L10n.tabClipboard,
-                    detail: turkish ? "Kalıcı geçmiş" : "Persistent history"
+                    detail: turkish ? "Kalıcı geçmiş, adaya sabitlenebilir" : "Persistent history, dockable"
+                )
+                featureChip(
+                    symbol: "checklist",
+                    title: L10n.tabTasks,
+                    detail: turkish ? "Todo listesi, filtreler" : "Todo list with filters"
                 )
                 featureChip(
                     symbol: "timer",

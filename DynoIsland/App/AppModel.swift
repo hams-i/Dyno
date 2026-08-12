@@ -4,6 +4,7 @@ import SwiftUI
 enum IslandTab: String, CaseIterable, Identifiable {
     case media
     case clipboard
+    case tasks
     case timer
     case counter
 
@@ -13,6 +14,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
         switch self {
         case .media: L10n.tabNowPlaying
         case .clipboard: L10n.tabClipboard
+        case .tasks: L10n.tabTasks
         case .timer: L10n.tabTimer
         case .counter: L10n.tabCounter
         }
@@ -22,13 +24,15 @@ enum IslandTab: String, CaseIterable, Identifiable {
         switch self {
         case .media: "waveform"
         case .clipboard: "doc.on.clipboard"
+        case .tasks: "checklist"
         case .timer: "timer"
         case .counter: "plus.circle"
         }
     }
 
+    /// Adaya küçültülüp “şimdi çalışıyor” olarak kalabilir.
     var canDockToIsland: Bool {
-        self == .timer || self == .counter
+        self == .clipboard || self == .tasks || self == .timer || self == .counter
     }
 }
 
@@ -103,6 +107,7 @@ final class AppModel: ObservableObject {
 
     let nowPlaying = NowPlayingService()
     let clipboard = ClipboardHistoryService()
+    let tasks = TasksService()
     let timer = TimerService()
     let counter = CounterService()
     let preferences = PreferencesStore.shared

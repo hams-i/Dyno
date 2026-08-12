@@ -2,7 +2,7 @@ export type Locale = "en" | "tr";
 
 export const locales: Locale[] = ["en", "tr"];
 
-export type IslandTabKey = "media" | "clipboard" | "timer" | "counter";
+export type IslandTabKey = "media" | "clipboard" | "tasks" | "timer" | "counter";
 
 export type FeatureDetail = {
   title: string;
@@ -74,6 +74,18 @@ export type Messages = {
     decrease: string;
     increase: string;
   };
+  tasks: {
+    empty: string;
+    emptyHint: string;
+    placeholder: string;
+    add: string;
+    filterAll: string;
+    filterActive: string;
+    filterCompleted: string;
+    completeSelected: string;
+    delete: string;
+    samples: string[];
+  };
   footer: {
     license: string;
     made: string;
@@ -94,13 +106,14 @@ const en: Messages = {
     title: "Your notch,",
     titleAccent: "alive.",
     subtitle:
-      "Now Playing, clipboard history, timer, and counter — morphing smoothly between a compact island and a full panel.",
+      "Now Playing, clipboard history, tasks, timer, and counter — morphing smoothly between a compact island and a full panel.",
     cta: "Get Dyno Island",
     ctaSecondary: "View on GitHub",
   },
   islandTabs: {
     media: "Now Playing",
     clipboard: "Clipboard",
+    tasks: "Tasks",
     timer: "Timer",
     counter: "Counter",
   },
@@ -123,6 +136,15 @@ const en: Messages = {
           "Browse recent copies in a compact three-column grid",
           "Tap any card to copy it again",
           "Clear the whole history in one step when you’re done",
+        ],
+      },
+      tasks: {
+        title: "Tasks",
+        desc: "Add to-dos in the notch, check them off, and pin the active one to the island.",
+        points: [
+          "Add tasks, filter All / Active / Completed",
+          "Tap a task to show its first letters on the island",
+          "Dock with the up arrow — complete the selected task at a glance",
         ],
       },
       timer: {
@@ -200,6 +222,24 @@ const en: Messages = {
     decrease: "Decrease by one",
     increase: "Increase by one",
   },
+  tasks: {
+    empty: "No tasks yet",
+    emptyHint: "Add a new task above.",
+    placeholder: "Add a task…",
+    add: "Add task",
+    filterAll: "All",
+    filterActive: "Active",
+    filterCompleted: "Completed",
+    completeSelected: "Complete selected task",
+    delete: "Delete task",
+    samples: [
+      "Ship Dyno landing",
+      "Review PR comments",
+      "Buy oat milk",
+      "Standup notes",
+      "Export Release build",
+    ],
+  },
   footer: {
     license: "MIT License",
     made: "Made for macOS",
@@ -220,13 +260,14 @@ const tr: Messages = {
     title: "Çentiğin",
     titleAccent: "canlı.",
     subtitle:
-      "Şimdi Çalıyor, pano geçmişi, zamanlayıcı ve sayaç — kompakt ada ile geniş panel arasında yumuşak morph animasyonları.",
+      "Şimdi Çalıyor, pano geçmişi, görevler, zamanlayıcı ve sayaç — kompakt ada ile geniş panel arasında yumuşak morph animasyonları.",
     cta: "Dyno Island'ı Al",
     ctaSecondary: "GitHub'da Gör",
   },
   islandTabs: {
     media: "Şimdi Çalıyor",
     clipboard: "Pano",
+    tasks: "Görevler",
     timer: "Zamanlayıcı",
     counter: "Sayaç",
   },
@@ -249,6 +290,15 @@ const tr: Messages = {
           "Son kopyaları üç sütunluk ızgarada tara",
           "Herhangi bir karta dokunup tekrar kopyala",
           "Bitince geçmişi tek adımda temizle",
+        ],
+      },
+      tasks: {
+        title: "Görevler",
+        desc: "Çentikte yapılacak ekle, tikle ve aktif görevi adaya sabitle.",
+        points: [
+          "Görev ekle, Tümü / Aktif / Tamamlanan filtrele",
+          "Bir göreve dokun — adada ilk harfleri görünsün",
+          "Yukarı ok ile sabitle — seçili görevi adadan tamamla",
         ],
       },
       timer: {
@@ -325,6 +375,24 @@ const tr: Messages = {
     notePlaceholder: "Not yaz…",
     decrease: "Bir azalt",
     increase: "Bir artır",
+  },
+  tasks: {
+    empty: "Henüz görev yok",
+    emptyHint: "Yukarıdan yeni bir görev ekle.",
+    placeholder: "Görev ekle…",
+    add: "Görev ekle",
+    filterAll: "Tümü",
+    filterActive: "Aktif",
+    filterCompleted: "Tamamlanan",
+    completeSelected: "Seçili görevi tamamla",
+    delete: "Görevi sil",
+    samples: [
+      "Landing’i yayınla",
+      "PR yorumlarını oku",
+      "Yulaf sütü al",
+      "Standup notları",
+      "Release export al",
+    ],
   },
   footer: {
     license: "MIT Lisansı",

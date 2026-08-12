@@ -34,6 +34,9 @@
 		B00000000000000000000019 /* PreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000019 /* PreferencesStore.swift */; };
 		B0000000000000000000001A /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000001A /* SettingsRootView.swift */; };
 		B0000000000000000000001D /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000001D /* L10n.swift */; };
+		B0000000000000000000001E /* TaskItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000001E /* TaskItem.swift */; };
+		B0000000000000000000001F /* TasksService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000001F /* TasksService.swift */; };
+		B00000000000000000000020 /* TasksTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000020 /* TasksTabView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +69,9 @@
 		F0000000000000000000001A /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
 		F0000000000000000000001C /* HotKeyController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyController.swift; sourceTree = "<group>"; };
 		F0000000000000000000001D /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
+		F0000000000000000000001E /* TaskItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskItem.swift; sourceTree = "<group>"; };
+		F0000000000000000000001F /* TasksService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksService.swift; sourceTree = "<group>"; };
+		F00000000000000000000020 /* TasksTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksTabView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +133,7 @@
 			children = (
 				F00000000000000000000004 /* ClipboardEntry.swift */,
 				F00000000000000000000005 /* NowPlayingSnapshot.swift */,
+				F0000000000000000000001E /* TaskItem.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -138,6 +145,7 @@
 				F00000000000000000000007 /* NowPlayingService.swift */,
 				F00000000000000000000013 /* TimerService.swift */,
 				F00000000000000000000014 /* CounterService.swift */,
+				F0000000000000000000001F /* TasksService.swift */,
 				F00000000000000000000017 /* ActivitiesStore.swift */,
 				F00000000000000000000018 /* ArtworkImageFactory.swift */,
 				F00000000000000000000019 /* PreferencesStore.swift */,
@@ -154,6 +162,7 @@
 				F0000000000000000000000C /* ExpandedIslandView.swift */,
 				F0000000000000000000000D /* MediaTabView.swift */,
 				F0000000000000000000000E /* ClipboardTabView.swift */,
+				F00000000000000000000020 /* TasksTabView.swift */,
 				F00000000000000000000015 /* TimerTabView.swift */,
 				F00000000000000000000016 /* CounterTabView.swift */,
 			);
@@ -308,6 +317,9 @@
 				B00000000000000000000019 /* PreferencesStore.swift in Sources */,
 				B0000000000000000000001D /* L10n.swift in Sources */,
 				B0000000000000000000001A /* SettingsRootView.swift in Sources */,
+				B0000000000000000000001E /* TaskItem.swift in Sources */,
+				B0000000000000000000001F /* TasksService.swift in Sources */,
+				B00000000000000000000020 /* TasksTabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

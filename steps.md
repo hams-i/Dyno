@@ -1,5 +1,52 @@
 # Steps
 
+## 2026-08-12 — Landing Tasks + yayın
+
+1. Landing demo/i18n’e Görevler sekmesi eklendi (seçim, filtre, ada etiketi).
+2. App + landing commit/push → GitHub Pages workflow.
+
+## 2026-08-12 — Ada 8 harf + sil hover sabit genişlik
+
+1. Seçili görev adada ilk 8 harf (sağa fade).
+2. Görev satırı sil butonu yeri sabit; hover’da yalnızca görünür, yazı kaymaz.
+
+## 2026-08-12 — Ada görev etiketi: 4 harf + fade
+
+1. Seçili görev adada yalnızca ilk 4 harf; sola net, sağa doğru kararır.
+
+## 2026-08-12 — Görevler: seçim + ada
+
+1. 6 nokta / sürükle-sırala kaldırıldı.
+2. Satıra basınca görev seçilir; dinamik adada başlığı görünür.
+3. “+” ikonu beyaz (koyu daire üzerinde).
+
+## 2026-08-12 — Scroll eksen kilidi + Tasks UX
+
+1. Dikey scroll varken yatay sekme geçişi kilitli (axis lock).
+2. Görevler input: SwiftUI TextField — yazılabiliyor; bar listeyle birlikte kayar.
+3. 6 nokta sürükleme: ince drop çizgisi + hysteresis; sıçrama/hız azaltıldı.
+
+## 2026-08-12 — Ada sol veri + Tasks input + hafıza
+
+1. Pano / Görevler / Timer / Sayaç: ada solunda ilgili veri yeniden görünür
+   (visibility dock’a kilitli değildi).
+2. Tasks input: field editor firstResponder çakışması düzeltildi — yazılabiliyor.
+3. Görev listesi Lazy→VStack; `.id(language)` remount kaldırıldı — aç/kapa’da
+   hafızada kalır. Timer/Sayaç sağ kontrolleri dock şartı olmadan tıklanır.
+
+## 2026-08-12 — Görevler sekmesi + ada davranışı
+
+1. Yeni `Tasks` sekmesi: ekle, tikle, All/Active/Completed filtre; tamamlanan
+   üstü çizili + gri; oluşturma/tamamlanma zamanı sağ altta.
+2. Clipboard/Tasks ada görünümünde ses dalgası “şimdi çalıyor” gibi animasyonlu.
+3. Input odak/seçimde beyaz zemin + siyah yazı.
+4. Yukarı ok ile dock: solda sıra no (ikon yok) + sağda tik / aşağı ok.
+5. 6 nokta ile sürükle-sırala; drop gölge çizgisi.
+
+## 2026-08-12 — Release export
+
+1. `./build.sh` → `dist/DynoIsland.app` yenilendi.
+
 ## 2026-08-12 — 3 parmak: fiziksel ekranı takip et
 
 1. NotchSpace + `stationary` + `canJoinAllSpaces` geri: 3 parmak Space’te ada

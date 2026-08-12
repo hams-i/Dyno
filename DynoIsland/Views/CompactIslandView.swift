@@ -3,7 +3,7 @@ import SwiftUI
 /// Dynamic Island ses çubukları — çalarken organik; durunca smooth noktalara iner.
 struct VoiceChartsView: View {
     var isAnimating: Bool
-    var color: Color = Color(red: 0.82, green: 0.68, blue: 0.48)
+    var color: Color = Color.accentColor
 
     private let barCount = 4
     private let barWidth: CGFloat = 2.5
@@ -100,17 +100,34 @@ struct IslandAccentLayer: View {
                 .onTapGesture { model.expandImmediately() }
                 .accessibilityLabel(L10n.expandIsland)
 
-            if model.selectedTab == .media {
-                VoiceChartsView(isAnimating: media.snapshot.isPlaying && media.snapshot.hasMedia)
+            // Dock değilken: Media / Pano / Görevler sağında ses dalgası.
+            // Timer / Sayaç sağında morph play/+ kalsın.
+            if !model.isActivityDocked, showsVoiceCharts {
+                VoiceChartsView(isAnimating: chartsAnimating)
                     .position(x: trailingCenterX(itemWidth: 18, inset: 11), y: collapsed.height / 2)
             }
 
+            // Dock’luyken: aşağı ok (aksiyon butonu morph katmanında).
             if model.isActivityDocked {
                 expandChevron
                     .position(x: trailingCenterX(itemWidth: 20, inset: 6), y: collapsed.height / 2)
             }
         }
         .frame(width: panelSize.width, height: panelSize.height, alignment: .topLeading)
+    }
+
+    private var showsVoiceCharts: Bool {
+        switch model.selectedTab {
+        case .media, .clipboard, .tasks: true
+        case .timer, .counter: false
+        }
+    }
+
+    private var chartsAnimating: Bool {
+        if model.selectedTab == .clipboard || model.selectedTab == .tasks {
+            return true
+        }
+        return media.snapshot.isPlaying && media.snapshot.hasMedia
     }
 
     private func trailingCenterX(itemWidth: CGFloat, inset: CGFloat) -> CGFloat {
@@ -137,6 +154,8 @@ struct IslandMorphLayer: View {
     /// durumundaki play/+ güncellemeleri için ayrı gözlem şart.
     @ObservedObject var timer: TimerService
     @ObservedObject var counter: CounterService
+    @ObservedObject var clipboard: ClipboardHistoryService
+    @ObservedObject var tasks: TasksService
     let panelSize: CGSize
 
     /// macOS Space Black — siyah ada üzerinde hafif ayrışır.
@@ -162,6 +181,8 @@ struct IslandMorphLayer: View {
             // sayfalarıyla birlikte hareket eder, sayfa alanının dışına
             // çıkınca maske tarafından kırpılırlar.
             artworkElement
+            clipboardElements
+            tasksElements
             timerElements
             counterElements
         }
@@ -220,6 +241,98 @@ struct IslandMorphLayer: View {
             MorphingArtwork(media: model.nowPlaying, metrics: metrics)
         }
         .offset(x: launchOffset(forLeadingWidth: 28))
+    }
+
+    /// Ada-only özet — panel morph hedefi yok; yalnızca daraltılmışken görünür.
+    @ViewBuilder
+    private var clipboardElements: some View {
+        MorphElement(
+            anchor: .clipboardCount,
+            edge: .leading,
+            inset: 10,
+            panelSize: panelSize,
+            collapsedSize: collapsed,
+            tab: .clipboard
+        ) { metrics in
+            Text("\(clipboard.entries.count)")
+                .font(.system(size: metrics.lerp(12, 18), weight: .bold, design: .rounded).monospacedDigit())
+                .foregroundStyle(.white)
+                .contentTransition(.numericText())
+                .opacity(islandOnlyOpacity(metrics.progress))
+                .fixedSize()
+        }
+        .offset(x: launchOffset(forLeadingWidth: 24))
+    }
+
+    @ViewBuilder
+    private var tasksElements: some View {
+        MorphElement(
+            anchor: .tasksCount,
+            edge: .leading,
+            inset: 10,
+            panelSize: panelSize,
+            collapsedSize: collapsed,
+            tab: .tasks
+        ) { metrics in
+            Text(tasks.islandLabel)
+                .font(.system(size: metrics.lerp(12, 18), weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .fixedSize()
+                // Sol net, sağa doğru karar / kaybolur.
+                .mask(
+                    LinearGradient(
+                        colors: [
+                            .white,
+                            .white.opacity(0.85),
+                            .white.opacity(0.35),
+                            .clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .opacity(islandOnlyOpacity(metrics.progress))
+        }
+        .offset(x: launchOffset(forLeadingWidth: 56))
+
+        MorphElement(
+            anchor: .tasksToggle,
+            edge: .trailing,
+            inset: trailingInset,
+            fixedIslandSize: CGSize(width: 22, height: 22),
+            panelSize: panelSize,
+            collapsedSize: collapsed,
+            tab: .tasks
+        ) { metrics in
+            Button {
+                withAnimation(.snappy(duration: 0.22)) {
+                    _ = tasks.completeSelected()
+                }
+            } label: {
+                Image(systemName: "checkmark")
+                    .font(.system(size: metrics.lerp(9.5, 18), weight: .bold))
+                    .foregroundStyle(.white.opacity(tasks.canCompleteSelected ? 0.95 : 0.35))
+                    .frame(width: metrics.size.width, height: metrics.size.height)
+                    .background(
+                        Circle()
+                            .fill(Self.spaceBlack)
+                            .overlay {
+                                Circle()
+                                    .strokeBorder(Color.white.opacity(0.14), lineWidth: 0.6)
+                            }
+                    )
+            }
+            .buttonStyle(.plain)
+            .disabled(!tasks.canCompleteSelected)
+            // Tik yalnızca yukarı ok ile dock’luyken; aksi halde sağda ses dalgası.
+            .opacity(model.isActivityDocked ? islandOnlyOpacity(metrics.progress) : 0)
+            .help(L10n.tasksCompleteNext)
+        }
+    }
+
+    private func islandOnlyOpacity(_ progress: CGFloat) -> Double {
+        Double(max(0, 1 - progress / 0.18))
     }
 
     @ViewBuilder
