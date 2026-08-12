@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { asset } from "@/lib/asset";
 import { cn } from "@/lib/utils";
 
 type MacNotchFrameProps = {
@@ -34,7 +35,7 @@ export function MacNotchFrame({
             onPointerDown={onBackdropPointerDown}
           >
             <Image
-              src="/wallpaper.jpg"
+              src={asset("/wallpaper.jpg")}
               alt=""
               fill
               priority

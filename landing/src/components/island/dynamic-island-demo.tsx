@@ -29,6 +29,7 @@ import {
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useLocale } from "@/context/locale-context";
+import { asset } from "@/lib/asset";
 import { MacNotchFrame } from "./mac-notch-frame";
 import { VoiceBars } from "./voice-bars";
 import { cn } from "@/lib/utils";
@@ -702,7 +703,7 @@ function CompactLead({
         }}
       >
         <Image
-          src="/album-art.jpg"
+          src={asset("/album-art.jpg")}
           alt=""
           fill
           sizes="35px"
@@ -891,7 +892,7 @@ function MediaPage({
           style={{ borderRadius: 12 }}
         >
           <Image
-            src="/album-art.jpg"
+            src={asset("/album-art.jpg")}
             alt=""
             fill
             sizes="(max-width: 640px) 128px, 178px"

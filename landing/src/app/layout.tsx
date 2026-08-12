@@ -3,19 +3,22 @@ import { LocaleProvider } from "@/context/locale-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
+const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://hams-i.github.io/Dyno/"),
   title: "Dyno Island — Dynamic Island for macOS",
   description:
     "Now Playing, clipboard, timer and counter in a morphing Dynamic Island for the Mac notch.",
   icons: {
-    icon: "/logo-256.png",
-    apple: "/logo.png",
+    icon: `${base}/logo-256.png`,
+    apple: `${base}/logo.png`,
   },
   openGraph: {
     title: "Dyno Island",
     description: "Dynamic Island for your Mac notch.",
-    url: "https://github.com/hams-i/Dyno",
-    images: [{ url: "/logo.png" }],
+    url: "https://hams-i.github.io/Dyno/",
+    images: [{ url: `${base}/logo.png` }],
   },
 };
 

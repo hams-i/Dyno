@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { asset } from "@/lib/asset";
 import { cn } from "@/lib/utils";
 
 type DynoLogoProps = {
@@ -11,7 +12,7 @@ type DynoLogoProps = {
 export function DynoLogo({ size = 32, className, priority }: DynoLogoProps) {
   return (
     <Image
-      src="/logo.png"
+      src={asset("/logo.png")}
       alt="Dyno Island"
       width={size}
       height={size}
